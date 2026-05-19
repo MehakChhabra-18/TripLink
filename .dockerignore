@@ -1,0 +1,37 @@
+# ─── Git ──────────────────────────────────────────────────────
+.git
+.gitignore
+
+# ─── Env files (injected via Render environment variables) ────
+.env
+.env.*
+!.env.example
+
+# ─── Dev dependencies / local tools ──────────────────────────
+node_modules
+
+# ─── Logs ────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ─── Test & Coverage ─────────────────────────────────────────
+coverage/
+src/tests/
+
+# ─── Generated (rebuilt in Docker) ───────────────────────────
+src/generated/
+
+# ─── OS / Editor ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ─── Docker ──────────────────────────────────────────────────
+Dockerfile
+.dockerignore
+
+# ─── Docs / misc ─────────────────────────────────────────────
+README.md
+*.md
