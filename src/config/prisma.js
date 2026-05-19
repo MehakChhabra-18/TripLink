@@ -2,7 +2,7 @@
  * Prisma Client Singleton
  * Prevents multiple PrismaClient instances in development (hot-reload)
  */
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient } = require("../generated/prisma");
 
 const globalForPrisma = globalThis;
 
