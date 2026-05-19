@@ -106,7 +106,7 @@ const frontendDriverRoutes = require("../routes/driver");
 const frontendRideRoutes = require("../routes/ride");
 const frontendPaymentRoutes = require("../routes/payment");
 
-app.get("/", (req, res) => res.render("home"));
+app.get("/", (req, res) => res.render("home", { user: req.session?.user || null }));
 app.use("/auth", frontendAuthRoutes);
 app.use("/rider", frontendRiderRoutes);
 app.use("/driver", frontendDriverRoutes);
