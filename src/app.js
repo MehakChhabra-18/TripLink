@@ -78,6 +78,15 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// ─── Root Route ───────────────────────────────────────────────────────────────
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome to TripLink Backend API 🚀",
+    docs: "/api/health",
+  });
+});
+
 // ─── API Routes ────────────────────────────────────────────────────────────────
 app.use("/api/v1/auth",     authRoutes);
 app.use("/api/v1/rides",    rideRoutes);
