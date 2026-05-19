@@ -5,7 +5,6 @@
 require("dotenv").config();
 
 const { validateEnv }    = require("./config/env");
-const { connectMongoDB } = require("./config/mongodb");
 const { verifyMailer }   = require("./config/mailer");
 
 // Validate required environment variables before starting
@@ -68,10 +67,7 @@ const start = async () => {
       console.log("");
     });
 
-    // 3. Non-critical: connect in background (don't block server startup)
-    connectMongoDB().catch((err) =>
-      console.warn("⚠️  MongoDB skipped:", err.message)
-    );
+    // 3. Non-critical: connect mailer in background
     verifyMailer().catch((err) =>
       console.warn("⚠️  Mailer skipped:", err.message)
     );

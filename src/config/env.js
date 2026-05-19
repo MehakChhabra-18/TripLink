@@ -11,7 +11,6 @@ const requiredVars = [
 ];
 
 const optionalVars = [
-  "MONGO_URI",
   "PORT",
   "CLOUDINARY_CLOUD_NAME",
   "CLOUDINARY_API_KEY",
