@@ -1,19 +1,28 @@
-# ===== Builder Stage =====
-FROM node:20 AS builder
+# ─────────────────────────────────────────────────────────────
+# TripLink Backend — Render-Ready Docker Image (Prisma v5)
+# ─────────────────────────────────────────────────────────────
+
+FROM node:20
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# IMPORTANT: copy prisma before npm install
+# Copy prisma schema BEFORE npm install
+# (postinstall: prisma generate --schema=./prisma/schema.prisma)
 COPY prisma ./prisma
 
-# Install dependencies
+# Install all dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy remaining project files
+# Copy remaining source files
 COPY . .
 
-# Generate Prisma Client
+# Re-generate Prisma Client after full source copy
+# (ensures generated files reflect final state)
 RUN npx prisma generate --schema=./prisma/schema.prisma
+
+EXPOSE 3000
+
+CMD ["node", "src/server.js"]
