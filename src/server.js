@@ -23,15 +23,22 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 // ─── Socket.IO ────────────────────────────────────────────────────────────────
-const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:5173",
-  "http://localhost:5173",
-  "http://localhost:5174",
-];
-
 const io = new Server(server, {
   cors: {
-    origin:      allowedOrigins,
+    origin: (origin, callback) => {
+      const allowed = [
+        process.env.FRONTEND_URL,
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "https://triplink-wkz0.onrender.com"
+      ].filter(Boolean);
+
+      if (!origin || origin === "null" || allowed.includes(origin) || origin.includes("onrender.com") || origin.includes("localhost")) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
     methods:     ["GET", "POST"],
     credentials: true,
   },
