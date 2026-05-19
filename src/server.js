@@ -50,37 +50,38 @@ initSocket(io);
 // ─── Startup ───────────────────────────────────────────────────────────────────
 const start = async () => {
   try {
-    // Test PostgreSQL connection via Prisma
+    // 1. Connect PostgreSQL (required — blocks startup)
     await prisma.$connect();
     console.log("✅ PostgreSQL (Prisma) connected");
 
-    // Connect MongoDB (for real-time tracking history)
-    await connectMongoDB();
-
-    // Verify email transporter
-    await verifyMailer();
-
-    // Start HTTP server
-    server.listen(PORT, () => {
+    // 2. Start HTTP server IMMEDIATELY so Render detects the open port
+    server.listen(PORT, "0.0.0.0", () => {
       console.log("");
       console.log("🚗  TripLink Backend v2.0 — Production Architecture");
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.log(`🌐  HTTP Server   : http://localhost:${PORT}`);
+      console.log(`🌐  HTTP Server   : http://0.0.0.0:${PORT}`);
       console.log(`📡  Socket.IO     : ready`);
       console.log(`🗄️   PostgreSQL    : connected`);
-      console.log(`🍃  MongoDB       : connected`);
       console.log(`🔒  Auth          : JWT + Refresh Tokens`);
-      console.log(`📧  Email OTP     : ${process.env.SMTP_USER || "not configured"}`);
       console.log(`💳  Razorpay      : ${process.env.RAZORPAY_KEY_ID ? "configured" : "not configured"}`);
-      console.log(`⚛️   Frontend URL  : ${process.env.FRONTEND_URL || "http://localhost:5173"}`);
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       console.log("");
     });
+
+    // 3. Non-critical: connect in background (don't block server startup)
+    connectMongoDB().catch((err) =>
+      console.warn("⚠️  MongoDB skipped:", err.message)
+    );
+    verifyMailer().catch((err) =>
+      console.warn("⚠️  Mailer skipped:", err.message)
+    );
+
   } catch (err) {
     console.error("❌ Server startup failed:", err.message);
     process.exit(1);
   }
 };
+
 
 // ─── Graceful Shutdown ────────────────────────────────────────────────────────
 const shutdown = async (signal) => {
