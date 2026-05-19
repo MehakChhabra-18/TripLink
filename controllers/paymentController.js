@@ -1,8 +1,7 @@
-const Ride = require("../models/Ride");
+const prisma = require("../src/config/prisma");
 const { createOrder, verifySignature } = require("../services/razorpayService");
 
 // ─── CREATE RAZORPAY ORDER ────────────────────────────────────────────────────
-// POST /api/v1/payment/create-order
 exports.createOrder = async (req, res) => {
   try {
     const { amount, rideId } = req.body;
@@ -13,9 +12,13 @@ exports.createOrder = async (req, res) => {
 
     const order = await createOrder(amount);
 
-    // Save orderId on the ride document
     if (rideId) {
-      await Ride.findByIdAndUpdate(rideId, { razorpayOrderId: order.id });
+      // Upsert payment entry for the ride
+      await prisma.payment.upsert({
+        where: { rideId },
+        update: { razorpayOrderId: order.id, amount: parseFloat(amount) },
+        create: { rideId, amount: parseFloat(amount), razorpayOrderId: order.id }
+      });
     }
 
     res.json({
@@ -31,7 +34,6 @@ exports.createOrder = async (req, res) => {
 };
 
 // ─── VERIFY PAYMENT SIGNATURE ─────────────────────────────────────────────────
-// POST /api/v1/payment/verify
 exports.verifyPayment = async (req, res) => {
   try {
     const {
@@ -51,14 +53,21 @@ exports.verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false, error: "Payment verification failed" });
     }
 
-    // Mark ride as paid in DB
     if (rideId) {
-      await Ride.findByIdAndUpdate(rideId, {
-        paymentStatus:     "paid",
-        razorpayPaymentId: razorpay_payment_id,
+      await prisma.payment.update({
+        where: { rideId },
+        data: {
+          status: "PAID",
+          razorpayPaymentId: razorpay_payment_id,
+          razorpaySignature: razorpay_signature
+        }
       });
 
-      // Notify rider via socket
+      await prisma.ride.update({
+        where: { id: rideId },
+        data: { paymentStatus: "PAID" }
+      });
+
       if (global.io) {
         global.io.emit("rideStatusUpdate", { status: "PAID", rideId });
       }
@@ -72,7 +81,6 @@ exports.verifyPayment = async (req, res) => {
 };
 
 // ─── CONFIRM CASH PAYMENT (Driver Side) ──────────────────────────────────────
-// POST /api/v1/payment/confirm-cash
 exports.confirmCash = async (req, res) => {
   try {
     const { rideId } = req.body;
@@ -81,10 +89,11 @@ exports.confirmCash = async (req, res) => {
       return res.status(400).json({ success: false, error: "Ride ID is required" });
     }
 
-    // Mark ride as paid in DB
-    await Ride.findByIdAndUpdate(rideId, { paymentStatus: "paid" });
+    await prisma.ride.update({
+      where: { id: rideId },
+      data: { paymentStatus: "PAID" }
+    });
 
-    // Notify rider via socket
     if (global.io) {
       global.io.emit("rideStatusUpdate", { status: "PAID", rideId });
     }

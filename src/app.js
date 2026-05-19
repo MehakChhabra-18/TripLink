@@ -49,6 +49,19 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 }));
 
+// ─── EJS View Engine & Session ──────────────────────────────────────────────────
+const session = require("express-session");
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "../views"));
+
+app.use(session({
+  secret: process.env.JWT_SECRET || "fallback_secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }
+}));
+
 // ─── Core Middleware ──────────────────────────────────────────────────────────
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -56,7 +69,7 @@ app.use(express.urlencoded({ extended: true }));
 // JSON body parser (skip for webhook route — it needs raw body)
 app.use((req, res, next) => {
   if (req.originalUrl === "/api/v1/payments/webhook") {
-    return next(); // Skip JSON parsing for webhooks
+    return next();
   }
   express.json()(req, res, next);
 });
@@ -78,22 +91,31 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ─── Root Route ───────────────────────────────────────────────────────────────
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Welcome to TripLink Backend API 🚀",
-    docs: "/api/health",
-  });
-});
-
-// ─── API Routes ────────────────────────────────────────────────────────────────
+// ─── API Routes (v2) ──────────────────────────────────────────────────────────
 app.use("/api/v1/auth",     authRoutes);
 app.use("/api/v1/rides",    rideRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/driver",   driverRoutes);
 app.use("/api/v1/rider",    riderRoutes);
 app.use("/api/v1/admin",    adminRoutes);
+
+// ─── FRONTEND ROUTES (v1 EJS) ─────────────────────────────────────────────────
+const frontendAuthRoutes = require("../routes/auth");
+const frontendRiderRoutes = require("../routes/rider");
+const frontendDriverRoutes = require("../routes/driver");
+const frontendRideRoutes = require("../routes/ride");
+const frontendPaymentRoutes = require("../routes/payment");
+
+app.get("/", (req, res) => res.render("home"));
+app.use("/auth", frontendAuthRoutes);
+app.use("/rider", frontendRiderRoutes);
+app.use("/driver", frontendDriverRoutes);
+app.use("/ride", frontendRideRoutes);
+app.use("/payment", frontendPaymentRoutes);
+
+// Compatibility aliases for EJS frontend scripts
+app.use("/api/v1/ride", frontendRideRoutes);
+app.use("/api/v1/payment", frontendPaymentRoutes);
 
 // ─── Store io on app for controllers ──────────────────────────────────────────
 // io is set via app.set("io", io) in server.js

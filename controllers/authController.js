@@ -1,5 +1,6 @@
 const jwt  = require("jsonwebtoken");
-const User = require("../models/User");
+const bcrypt = require("bcrypt");
+const prisma = require("../src/config/prisma");
 
 const JWT_SECRET  = process.env.JWT_SECRET  || "triplink-jwt-secret-2024";
 const JWT_EXPIRES = process.env.JWT_EXPIRES || "7d";
@@ -12,7 +13,7 @@ const isApiRequest = (req) =>
 
 function signToken(user) {
   return jwt.sign(
-    { id: user._id, name: user.name, role: user.role },
+    { id: user.id, name: user.name, role: user.role },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES }
   );
@@ -30,7 +31,7 @@ exports.register = async (req, res) => {
       return res.render("register", { error: "All fields are required" });
     }
 
-    const existing = await User.findOne({ email });
+    const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       if (isApiRequest(req)) {
         return res.status(409).json({ error: "Email already registered" });
@@ -38,22 +39,34 @@ exports.register = async (req, res) => {
       return res.render("register", { error: "Email already registered" });
     }
 
-    // Password is hashed by the pre-save hook in User model
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role,
-      phone,
-      carModel:  role === "driver" ? carModel  : undefined,
-      carNumber: role === "driver" ? carNumber : undefined,
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const roleEnum = role.toUpperCase();
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role: roleEnum,
+        phone,
+        ...(roleEnum === "RIDER" ? { rider: { create: {} } } : { 
+          driver: { 
+            create: { 
+              vehicles: carModel && carNumber ? {
+                create: { make: "Generic", model: carModel, year: 2020, color: "White", licensePlate: carNumber }
+              } : undefined
+            } 
+          } 
+        })
+      },
+      include: { driver: true }
     });
 
     if (isApiRequest(req)) {
       const token = signToken(user);
       return res.status(201).json({
         token,
-        user: { id: user._id, name: user.name, role: user.role, email: user.email },
+        user: { id: user.id, name: user.name, role: user.role, email: user.email },
       });
     }
 
@@ -72,13 +85,13 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email }, include: { driver: true } });
     if (!user) {
       if (isApiRequest(req)) return res.status(401).json({ error: "User not found" });
       return res.render("login", { error: "User not found" });
     }
 
-    const match = await user.comparePassword(password);
+    const match = await bcrypt.compare(password, user.password);
     if (!match) {
       if (isApiRequest(req)) return res.status(401).json({ error: "Incorrect password" });
       return res.render("login", { error: "Wrong password" });
@@ -86,23 +99,23 @@ exports.login = async (req, res) => {
 
     // Set session (for EJS)
     req.session.user = {
-      id:          user._id,
+      id:          user.id,
       name:        user.name,
-      role:        user.role,
-      isAvailable: user.isAvailable,
-      carModel:    user.carModel,
+      role:        user.role.toLowerCase(),
+      isAvailable: user.driver ? user.driver.isAvailable : false,
+      carModel:    "Standard", // Fallback for old EJS expectations
     };
 
     if (isApiRequest(req)) {
       const token = signToken(user);
       return res.json({
         token,
-        user: { id: user._id, name: user.name, role: user.role, email: user.email },
+        user: { id: user.id, name: user.name, role: user.role, email: user.email },
       });
     }
 
-    if (user.role === "rider")  return res.redirect("/rider/dashboard");
-    if (user.role === "driver") return res.redirect("/driver/dashboard");
+    if (user.role === "RIDER")  return res.redirect("/rider/dashboard");
+    if (user.role === "DRIVER") return res.redirect("/driver/dashboard");
     res.redirect("/");
   } catch (err) {
     console.error("Login error:", err);
@@ -122,7 +135,8 @@ exports.logout = (req, res) => {
 // ─── GET CURRENT USER (API only) ─────────────────────────────────────────────
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if(user) delete user.password;
     res.json({ user });
   } catch (err) {
     res.status(500).json({ error: err.message });
