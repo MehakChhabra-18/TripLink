@@ -32,14 +32,15 @@ app.use(helmet({
 
 // ─── CORS ──────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
-  process.env.ALLOWED_ORIGIN || "http://localhost:3000",
+  process.env.ALLOWED_ORIGIN,
   "http://localhost:3000",
-];
+  "https://triplink-wkz0.onrender.com",
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (mobile apps, Postman, etc.) or same-origin / local / render deployments
+    if (!origin || origin === "null" || allowedOrigins.includes(origin) || origin.includes("onrender.com") || origin.includes("localhost")) {
       return callback(null, true);
     }
     callback(new Error(`CORS blocked: ${origin}`));
