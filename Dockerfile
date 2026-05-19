@@ -1,6 +1,5 @@
 # ─────────────────────────────────────────────────────────────
-# TripLink Backend — Render-Ready Docker Image
-# Single-stage build (avoids multi-stage copy issues)
+# TripLink Backend — Render-Ready Docker Image (Prisma v5)
 # ─────────────────────────────────────────────────────────────
 
 FROM node:20-alpine
@@ -14,11 +13,10 @@ RUN apk add --no-cache python3 make g++
 COPY package*.json ./
 
 # Copy prisma schema BEFORE npm install
-# (postinstall runs `prisma generate` which needs the schema)
+# postinstall runs `prisma generate --schema=./prisma/schema.prisma`
 COPY prisma ./prisma
-COPY prisma.config.js ./prisma.config.js
 
-# Install all dependencies (postinstall: prisma generate runs here)
+# Install all deps (postinstall: prisma generate runs here)
 RUN npm install --legacy-peer-deps
 
 # Copy rest of source files

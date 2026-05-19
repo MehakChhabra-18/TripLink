@@ -1,9 +1,7 @@
 /**
- * Prisma Client Singleton — Prisma v7
- *
- * In Prisma v7, `url` is removed from schema's datasource block.
- * The DATABASE_URL must be passed explicitly via the `datasources`
- * constructor option at runtime.
+ * Prisma Client Singleton (Prisma v5)
+ * Imports from custom output path: src/generated/prisma
+ * DATABASE_URL is read from env via schema's datasource block.
  */
 const { PrismaClient } = require("../generated/prisma");
 
@@ -13,10 +11,6 @@ const globalForPrisma = globalThis;
 const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    // Prisma v7: pass DATABASE_URL here since schema has no `url` field
-    datasources: {
-      db: { url: process.env.DATABASE_URL },
-    },
     log: process.env.NODE_ENV === "development"
       ? ["query", "warn", "error"]
       : ["error"],
