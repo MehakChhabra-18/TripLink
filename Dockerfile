@@ -7,16 +7,18 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first (layer caching)
 COPY package*.json ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./prisma.config.ts
 
-# Install all dependencies (including devDeps needed for prisma generate)
-RUN npm install --legacy-peer-deps
+# Install dependencies — skip postinstall (prisma generate runs separately below)
+RUN npm install --legacy-peer-deps --ignore-scripts
 
-# Copy all project files
+# Copy remaining source files
 COPY . .
 
-# Generate Prisma Client → outputs to src/generated/prisma
+# Generate Prisma Client (schema + files are now all present)
 RUN npx prisma generate
 
 # ===== Production Stage =====
@@ -33,7 +35,6 @@ COPY --from=builder /app/node_modules    ./node_modules
 COPY --from=builder /app/src             ./src
 COPY --from=builder /app/prisma          ./prisma
 COPY --from=builder /app/package.json    ./package.json
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 # Use non-root user
 USER triplink
