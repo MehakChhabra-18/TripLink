@@ -25,4 +25,6 @@ RUN npx prisma generate --schema=./prisma/schema.prisma
 
 EXPOSE 3000
 
-CMD ["node", "src/server.js"]
+# Run DB migrations then start server
+# (free-tier alternative to Render's paid Pre-Deploy Command)
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=./prisma/schema.prisma && node src/server.js"]
