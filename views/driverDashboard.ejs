@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Dashboard — TripLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .driver-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .driver-info h1 { margin-bottom: 2px; }
+    .driver-info p  { font-size: 13px; color: var(--text-muted); }
+
+    .toggle-form { margin: 0; }
+
+    .toggle-btn {
+      padding: 10px 22px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      width: auto;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      border: none;
+    }
+
+    .toggle-btn.online  { background: rgba(239,68,68,0.15);  color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .toggle-btn.offline { background: rgba(34,197,94,0.15);  color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+    .toggle-btn:hover { transform: scale(1.04); box-shadow: none; }
+
+    /* Rides section */
+    .rides-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 28px 0 8px;
+    }
+
+    .rides-header h2 { margin: 0; }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ef4444;
+    }
+
+    .live-dot {
+      width: 6px; height: 6px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: pulse-green 1s infinite;
+    }
+
+    /* Ride card enhanced */
+    .ride-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ride-card::after {
+      content: '🚗';
+      position: absolute;
+      right: 16px;
+      bottom: 12px;
+      font-size: 32px;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .ride-card .rider-name {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .fare-compare {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+
+    .fare-tag-est {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .fare-tag-offered {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent-2);
+    }
+
+    .fare-diff {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+
+    .fare-diff.more { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .fare-diff.less { background: rgba(239,68,68,0.15);  color: #ef4444; }
+    .fare-diff.same { background: rgba(108,99,255,0.15); color: #6c63ff; }
+
+    .ride-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .ride-actions .accept-btn {
+      flex: 1;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: none;
+    }
+
+    .ride-actions .reject-btn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid rgba(239,68,68,0.4);
+      color: #ef4444;
+    }
+
+    .ride-actions .reject-btn:hover {
+      background: rgba(239,68,68,0.08);
+      box-shadow: none;
+    }
+
+    /* Removing animation for cards that disappear */
+    .ride-card.removing {
+      animation: slideOut 0.4s ease forwards;
+    }
+
+    @keyframes slideOut {
+      to { opacity: 0; transform: translateX(100px) scale(0.95); }
+    }
+
+    /* Empty state */
+    .empty-state { padding: 60px 20px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">⚡ TripLink</div>
+    <div class="nav-links">
+      <a href="/auth/logout">Logout</a>
+    </div>
+  </nav>
+
+  <!-- DRIVER HEADER -->
+  <div class="driver-header">
+    <div class="driver-info">
+      <h1>Hey, <%= user.name %> 👋</h1>
+      <p>🚙 <%= user.carModel || "No vehicle added" %></p>
+    </div>
+
+    <form action="/driver/toggleAvailability" method="POST" class="toggle-form">
+      <% if (user.isAvailable) { %>
+        <div class="status-pill online" style="margin-bottom:10px;">
+          <div class="status-dot"></div> Online — accepting rides
+        </div>
+        <button type="submit" class="toggle-btn online">Go Offline</button>
+      <% } else { %>
+        <div class="status-pill offline" style="margin-bottom:10px;">
+          <div class="status-dot"></div> Offline
+        </div>
+        <button type="submit" class="toggle-btn offline">Go Online</button>
+      <% } %>
+    </form>
+  </div>
+
+  <!-- ─── ACTIVE RIDE (If driver has accepted a ride) ─── -->
+  <% if (typeof activeRide !== 'undefined' && activeRide) { %>
+    <div class="card" style="margin-top:20px; border-left: 4px solid var(--accent); background: rgba(108,99,255,0.03);">
+      <h2 style="color:var(--accent); margin-bottom: 12px;">🚗 Active Ride</h2>
+      
+      <div class="route-display" style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; margin-bottom: 14px;">
+        <div style="display:flex; align-items:center; gap:10px; font-size:14px;">
+          <div style="width:10px; height:10px; border-radius:50%; background:var(--green);"></div>
+          <span><%= activeRide.pickup %></span>
+        </div>
+        <div style="width:1px; height:16px; background:var(--border); margin-left:4px;"></div>
+        <div style="display:flex; align-items:center; gap:10px; font-size:14px;">
+          <div style="width:10px; height:10px; border-radius:50%; background:var(--red);"></div>
+          <span><%= activeRide.drop || activeRide.destination %></span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;">
+        <span class="info-pill" style="background:rgba(255,255,255,0.05); padding:6px 12px; border-radius:20px; font-size:13px;">
+          👤 <%= activeRide.rider ? activeRide.rider.name : 'Rider' %>
+        </span>
+        <span class="info-pill" style="background:rgba(255,255,255,0.05); padding:6px 12px; border-radius:20px; font-size:13px;">
+          💰 Fare: ₹<%= activeRide.offeredFare %>
+        </span>
+      </div>
+
+      <% if (activeRide.rideStatus === 'accepted') { %>
+        <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:16px; text-align:center;">
+          <p style="font-size:13px; color:var(--text-primary); margin-bottom:12px; font-weight:600;">Arrived at pickup? Ask rider for OTP to start the ride.</p>
+          <div style="display:flex; gap:10px; justify-content:center; align-items:center;">
+            <input type="text" id="driverOtpInput" placeholder="Enter 4-digit OTP" maxlength="4" style="width:160px; font-size:18px; text-align:center; font-weight:bold; letter-spacing:4px; padding:10px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:white;">
+            <button onclick="verifyRideOTP('<%= activeRide._id %>')" style="background:linear-gradient(135deg, #22c55e, #16a34a); border:none; padding:12px 20px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">Start Ride</button>
+          </div>
+        </div>
+      <% } else if (activeRide.rideStatus === 'started') { %>
+        <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:16px; text-align:center;">
+          <p style="font-size:15px; color:var(--text-primary); font-weight:600; margin-bottom:12px;">Ride is in progress! 🚗</p>
+          <button onclick="completeRide('<%= activeRide._id %>')" style="background:linear-gradient(135deg, #3b82f6, #2563eb); border:none; width:100%; padding:14px; border-radius:8px; color:white; font-weight:bold; cursor:pointer; font-size:16px;">
+            🏁 Complete Ride
+          </button>
+        </div>
+      <% } else if (activeRide.rideStatus === 'completed') { %>
+        <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:16px; text-align:center;">
+          <p style="font-size:15px; color:var(--text-primary); font-weight:600; margin-bottom:6px;">Waiting for Payment 💵</p>
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Rider needs to pay ₹<%= activeRide.offeredFare %>. If paid in cash, confirm below.</p>
+          <button onclick="confirmCashPayment('<%= activeRide._id %>')" style="background:linear-gradient(135deg, #f59e0b, #d97706); border:none; width:100%; padding:14px; border-radius:8px; color:white; font-weight:bold; cursor:pointer; font-size:16px;">
+            💰 Confirm Cash Received
+          </button>
+        </div>
+      <% } %>
+    </div>
+
+    <script>
+      async function confirmCashPayment(rideId) {
+        if (!confirm('Are you sure you received the cash?')) return;
+        try {
+          const res = await fetch(`/api/v1/payment/confirm-cash`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rideId })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('✅ Paid', 'Payment confirmed! Ride is fully complete.', 'success');
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            showToast('❌ Failed', data.message || data.error || 'Could not confirm payment', 'error');
+          }
+        } catch (err) {
+          showToast('❌ Error', 'Failed to confirm payment', 'error');
+        }
+      }
+      async function verifyRideOTP(rideId) {
+        const otp = document.getElementById('driverOtpInput').value;
+        if (!otp || otp.length !== 4) {
+          showToast('⚠️ Error', 'Please enter a valid 4-digit OTP', 'error');
+          return;
+        }
+        
+        try {
+          // Using PUT /api/v1/ride/:id/status since that's what's supported in our codebase, wait, let's check the API exactly.
+          // Wait, I will use POST /api/v1/ride/verify-otp as defined in ride.js
+          const res = await fetch('/api/v1/ride/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rideId, otp })
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            showToast('✅ Success', 'OTP Verified! Ride Started.', 'success');
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            showToast('❌ Failed', data.message || data.error || 'Invalid OTP', 'error');
+          }
+        } catch (err) {
+          showToast('❌ Error', 'Failed to verify OTP', 'error');
+        }
+      }
+
+      async function completeRide(rideId) {
+        if (!confirm('Are you sure you want to complete this ride?')) return;
+        try {
+          const res = await fetch(`/api/v1/ride/${rideId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'completed' })
+          });
+          const data = await res.json();
+          if (data.success || data.ride) {
+            showToast('✅ Completed', 'Ride completed successfully!', 'success');
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            showToast('❌ Failed', data.message || data.error || 'Could not complete ride', 'error');
+          }
+        } catch (err) {
+          showToast('❌ Error', 'Failed to complete ride', 'error');
+        }
+      }
+    </script>
+  <% } %>
+
+  <!-- ─── RIDE REQUESTS ─── -->
+  <div class="rides-header">
+    <h2>📋 Ride Requests</h2>
+    <% if (user.isAvailable) { %>
+    <div class="live-badge">
+      <div class="live-dot"></div> LIVE
+    </div>
+    <% } %>
+  </div>
+
+  <% if (!user.isAvailable) { %>
+    <div class="empty-state">
+      <div class="icon">😴</div>
+      <h3>You're offline</h3>
+      <p>Go online to start receiving ride requests from riders near you.</p>
+    </div>
+
+  <% } else { %>
+
+    <!-- Ride cards container — new rides injected here via socket -->
+    <div id="ridesList">
+
+      <% if (pendingRides.length === 0) { %>
+      <div class="empty-state" id="noRides">
+        <div class="icon">🕐</div>
+        <h3>No requests yet</h3>
+        <p>You'll be notified the moment a rider places a request.</p>
+      </div>
+      <% } %>
+
+      <% pendingRides.forEach(ride => { %>
+      <div class="ride-card" id="card-<%= ride._id %>">
+        <div class="rider-name">👤 <%= ride.rider ? ride.rider.name : 'Rider' %></div>
+
+        <div class="route">
+          📍 <%= ride.pickup %> → 🏁 <%= ride.drop %>
+        </div>
+
+        <div class="meta">📏 <%= ride.distanceKm || '—' %> km · Estimated ₹<%= ride.estimatedFare || '—' %></div>
+
+        <%
+          let offered   = ride.offeredFare || 0;
+          let estimated = ride.estimatedFare || 0;
+          let diff      = offered - estimated;
+          let diffStr   = diff > 0 ? '+₹'+diff : diff < 0 ? '-₹'+Math.abs(diff) : 'Same as estimate';
+          let diffClass = diff > 0 ? 'more' : diff < 0 ? 'less' : 'same';
+        %>
+
+        <div class="fare-compare">
+          <span class="fare-tag-offered">₹<%= ride.offeredFare || '—' %></span>
+          <span class="fare-tag-est">₹<%= ride.estimatedFare %></span>
+          <span class="fare-diff <%= diffClass %>"><%= diffStr %></span>
+        </div>
+
+        <div class="ride-actions">
+          <form action="/driver/accept/<%= ride._id %>" method="POST" style="flex:1;display:contents;">
+            <button type="submit" class="accept-btn">✅ Accept</button>
+          </form>
+          <form action="/driver/reject/<%= ride._id %>" method="POST" style="flex:1;display:contents;">
+            <button type="submit" class="reject-btn">✗ Reject</button>
+          </form>
+        </div>
+      </div>
+      <% }); %>
+
+    </div>
+
+    <!-- ─── COMPLETED RIDES HISTORY ─── -->
+    <% if (typeof completedRides !== 'undefined' && completedRides.length > 0) { %>
+      <div style="margin-top: 40px;">
+        <h2 style="font-size: 16px; color: var(--text-secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>✅</span> Recent Completed Rides
+        </h2>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <% completedRides.forEach(ride => { %>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <div style="font-size: 13px; color: var(--text-secondary);">
+                  👤 <%= ride.rider ? ride.rider.name : 'Unknown Rider' %>
+                </div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: #22c55e;">
+                  ₹<%= ride.offeredFare %>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); margin-bottom: 6px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--green);"></div>
+                <%= ride.pickup %>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary);">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--red);"></div>
+                <%= ride.drop || ride.destination %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast" style="display:none;">
+  <div class="toast-title" id="toastTitle"></div>
+  <div class="toast-msg"   id="toastMsg"></div>
+</div>
+
+<!-- Socket.io -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const isOnline = <%= user.isAvailable ? 'true' : 'false' %>;
+
+socket.emit("join", "<%= user.id %>");
+
+function showToast(title, msg, type = "info") {
+  const t = document.getElementById("toast");
+  document.getElementById("toastTitle").textContent = title;
+  document.getElementById("toastMsg").textContent   = msg;
+  t.className = "toast " + type;
+  t.style.display = "block";
+  setTimeout(() => { t.style.display = "none"; }, 4000);
+}
+
+// ─── New ride arrives in real-time ────────────────────────────────────────────
+socket.on("newRide", (ride) => {
+  if (!isOnline) return;
+
+  // Hide "no rides" placeholder
+  const noRides = document.getElementById("noRides");
+  if (noRides) noRides.style.display = "none";
+
+  const diff      = (ride.offeredFare || 0) - (ride.estimatedFare || 0);
+  const diffStr   = diff > 0 ? "+₹"+diff : diff < 0 ? "-₹"+Math.abs(diff) : "Same as estimate";
+  const diffClass = diff > 0 ? "more" : diff < 0 ? "less" : "same";
+
+  const card = document.createElement("div");
+  card.className = "ride-card";
+  card.id = "card-" + ride._id;
+  card.innerHTML = `
+    <div class="rider-name">👤 ${ride.riderName || "Rider"}</div>
+    <div class="route">📍 ${ride.pickup} → 🏁 ${ride.drop}</div>
+    <div class="meta">📏 ${ride.distanceKm || "—"} km · Estimated ₹${ride.estimatedFare || "—"}</div>
+    <div class="fare-compare">
+      <span class="fare-tag-offered">₹${ride.offeredFare || "—"}</span>
+      <span class="fare-tag-est">₹${ride.estimatedFare}</span>
+      <span class="fare-diff ${diffClass}">${diffStr}</span>
+    </div>
+    <div class="ride-actions">
+      <form action="/driver/accept/${ride._id}" method="POST" style="flex:1;display:contents;">
+        <button type="submit" class="accept-btn">✅ Accept</button>
+      </form>
+      <form action="/driver/reject/${ride._id}" method="POST" style="flex:1;display:contents;">
+        <button type="submit" class="reject-btn">✗ Reject</button>
+      </form>
+    </div>
+  `;
+
+  document.getElementById("ridesList").prepend(card);
+  showToast("🚨 New Ride Request!", `${ride.pickup} → ${ride.drop} · ₹${ride.offeredFare}`);
+});
+
+// ─── Ride taken by another driver ─────────────────────────────────────────────
+socket.on("rideGone", ({ rideId }) => {
+  const card = document.getElementById("card-" + rideId);
+  if (card) {
+    card.classList.add("removing");
+    setTimeout(() => card.remove(), 450);
+  }
+});
+
+// ─── Ride status updates ───────────────────────────────────────────────────────
+socket.on("rideStatusUpdate", (data) => {
+  if (data.status === "COMPLETED" || data.status === "completed") {
+    showToast("✅ Ride Completed!", "Payment will be collected now.", "success");
+    setTimeout(() => location.reload(), 2500);
+  } else if (data.status === "CANCELLED" || data.status === "cancelled") {
+    showToast("❌ Ride Cancelled", "Rider cancelled the ride.", "error");
+    setTimeout(() => location.reload(), 2500);
+  }
+});
+
+// ─── RIDER LOCATION → Show on driver's map ────────────────────────────────────
+socket.on("update-rider-location", (data) => {
+  console.log("🧍 Driver received rider location:", data);
+  if (data.lat && data.lng) {
+    updateRiderMarker(data.lat, data.lng);
+  }
+});
+</script>
+
+<!-- ════════════════════════════════════════════════════════════
+     Driver GPS Location Broadcaster
+     Sends driver's live position to rider via socket
+════════════════════════════════════════════════════════════ -->
+<script>
+const ACTIVE_RIDE_DATA = <%- JSON.stringify(
+  typeof activeRide !== 'undefined' && activeRide ? {
+    _id:     activeRide._id.toString(),
+    riderId: activeRide.rider
+              ? (activeRide.rider._id
+                  ? activeRide.rider._id.toString()
+                  : activeRide.rider.toString())
+              : null,
+    pickup:  activeRide.pickup,
+    status:  activeRide.rideStatus
+  } : null
+) %>;
+
+console.log("🚗 ACTIVE_RIDE_DATA:", ACTIVE_RIDE_DATA);
+
+let locationWatchId = null;
+
+function startLocationBroadcast() {
+  if (!ACTIVE_RIDE_DATA) return;
+  if (!["accepted", "started"].includes(ACTIVE_RIDE_DATA.status)) return;
+  if (!navigator.geolocation || !ACTIVE_RIDE_DATA.riderId) return;
+
+  let lastPosition = null;
+
+  const emitLocation = (position) => {
+    lastPosition = position;
+    const { latitude: lat, longitude: lng } = position.coords;
+    socket.emit("driver-location", {
+      rideId:        ACTIVE_RIDE_DATA._id,
+      riderId:       ACTIVE_RIDE_DATA.riderId,
+      lat, lng,
+      pickupAddress: ACTIVE_RIDE_DATA.pickup,
+    });
+  };
+
+  const geoOpts = { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 };
+  navigator.geolocation.getCurrentPosition(emitLocation, console.warn, geoOpts);
+  locationWatchId = navigator.geolocation.watchPosition(emitLocation, console.warn, geoOpts);
+  setInterval(() => { if (lastPosition) emitLocation(lastPosition); }, 5000);
+}
+
+startLocationBroadcast();
+window.addEventListener("beforeunload", () => {
+  if (locationWatchId !== null) navigator.geolocation.clearWatch(locationWatchId);
+});
+</script>
+
+<!-- ════════════════════════════════════════════════════════════
+     Driver Map — shows rider's live pickup location
+     Only shown when driver has an active/accepted ride
+════════════════════════════════════════════════════════════ -->
+<% if (typeof activeRide !== 'undefined' && activeRide && ['accepted','started'].includes(activeRide.rideStatus)) { %>
+<style>
+  #driverMap {
+    width: 100%;
+    height: 280px;
+    border-radius: 16px;
+    border: 1px solid rgba(108,99,255,0.3);
+    margin: 24px 0 0;
+    overflow: hidden;
+    background: #1a1a2e;
+  }
+  .map-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 20px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rider-location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #22c55e;
+    margin-bottom: 8px;
+  }
+  .rider-dot {
+    width: 6px; height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse-green 1s infinite;
+  }
+</style>
+
+<div class="container" style="margin-top:0;padding-top:0;">
+  <div class="rider-location-badge">
+    <div class="rider-dot"></div> Rider Location — Live
+  </div>
+  <p class="map-section-title">
+    🧍 Rider is at pickup — navigate to them
+  </p>
+  <div id="driverMap"></div>
+</div>
+
+<script>
+// Active ride data from server
+const DRIVER_ACTIVE = <%- JSON.stringify({
+  pickupAddress: activeRide.pickup,
+  dropAddress:   activeRide.drop,
+  rideId:        activeRide._id.toString(),
+  status:        activeRide.rideStatus,
+  riderId:       activeRide.rider
+                   ? (activeRide.rider._id
+                       ? activeRide.rider._id.toString()
+                       : activeRide.rider.toString())
+                   : null
+}) %>;
+
+let driverMapInstance = null;
+let riderMarker       = null;
+let driverSelfMarker  = null;
+
+function initDriverMap() {
+  const mapEl = document.getElementById("driverMap");
+  if (!mapEl) return;
+
+  driverMapInstance = new google.maps.Map(mapEl, {
+    zoom:             14,
+    center:           { lat: 28.6139, lng: 77.2090 }, // Delhi default
+    disableDefaultUI: true,
+    zoomControl:      true,
+    styles: [
+      { elementType: "geometry",            stylers: [{ color: "#1a1a2e" }] },
+      { elementType: "labels.text.fill",    stylers: [{ color: "#8d9db5" }] },
+      { elementType: "labels.text.stroke",  stylers: [{ color: "#1a1a2e" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2d44" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#3a3a5c" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d1117" }] },
+      { featureType: "poi",     stylers: [{ visibility: "off" }] },
+      { featureType: "transit", stylers: [{ visibility: "off" }] },
+    ],
+  });
+
+  // Show pickup location immediately via geocoding
+  if (DRIVER_ACTIVE.pickupAddress) {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: DRIVER_ACTIVE.pickupAddress }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        const pickupLatLng = results[0].geometry.location;
+        driverMapInstance.setCenter(pickupLatLng);
+        // Pickup pin (rider's static location from booking)
+        new google.maps.Marker({
+          position: pickupLatLng,
+          map:      driverMapInstance,
+          title:    "Pickup — " + DRIVER_ACTIVE.pickupAddress,
+          icon: {
+            url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="18" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
+                <text x="20" y="26" text-anchor="middle" font-size="18">📍</text>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(40, 40),
+            anchor:     new google.maps.Point(20, 20),
+          },
+          zIndex: 998,
+        });
+      }
+    });
+  }
+
+  // Show driver's own live location
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition((pos) => {
+      const driverPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      if (!driverSelfMarker) {
+        driverSelfMarker = new google.maps.Marker({
+          position: driverPos,
+          map:      driverMapInstance,
+          title:    "You (Driver)",
+          icon: {
+            url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="18" fill="#6c63ff" stroke="#ffffff" stroke-width="2"/>
+                <text x="20" y="26" text-anchor="middle" font-size="18">🚗</text>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(40, 40),
+            anchor:     new google.maps.Point(20, 20),
+          },
+          zIndex: 999,
+        });
+      } else {
+        driverSelfMarker.setPosition(driverPos);
+      }
+    }, null, { enableHighAccuracy: true, maximumAge: 3000 });
+  }
+}
+
+// Update rider's live marker (from socket)
+function updateRiderMarker(lat, lng) {
+  if (!driverMapInstance) return;
+  const pos = { lat, lng };
+
+  if (!riderMarker) {
+    riderMarker = new google.maps.Marker({
+      position:  pos,
+      map:       driverMapInstance,
+      title:     "Rider — Live Location",
+      animation: google.maps.Animation.DROP,
+      icon: {
+        url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="18" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+            <text x="20" y="26" text-anchor="middle" font-size="18">🧍</text>
+          </svg>
+        `),
+        scaledSize: new google.maps.Size(40, 40),
+        anchor:     new google.maps.Point(20, 20),
+      },
+      zIndex: 1000,
+    });
+    console.log("🧍 Rider marker created at", lat, lng);
+  } else {
+    riderMarker.setPosition(pos);
+    console.log("🧍 Rider marker moved to", lat, lng);
+  }
+  // Pan to rider
+  driverMapInstance.panTo(pos);
+}
+
+// initDriverMap is called by the Google Maps script callback
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=<%= process.env.GOOGLE_MAPS_API || '' %>&callback=initDriverMap"
+  async defer>
+</script>
+<% } %>
+
+</body>
+</html>

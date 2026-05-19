@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rider Dashboard — TripLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .booking-steps { margin-bottom: 24px; }
+
+    /* ── Location input wrapper ── */
+    .pickup-wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .loc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6c63ff;
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.25);
+      border-radius: 8px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: fit-content;
+      line-height: 1;
+    }
+
+    .loc-btn:hover {
+      background: rgba(108,99,255,0.16);
+      border-color: rgba(108,99,255,0.5);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .loc-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .loc-btn .loc-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #6c63ff;
+      flex-shrink: 0;
+    }
+
+    .loc-btn.detecting .loc-dot {
+      animation: pulse-green 0.8s ease infinite;
+      background: #f59e0b;
+    }
+
+    .loc-btn.success .loc-dot {
+      background: #22c55e;
+      animation: none;
+    }
+
+    .loc-btn.error .loc-dot {
+      background: #ef4444;
+      animation: none;
+    }
+
+    .pickup-field-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pickup-field-row input {
+      flex: 1;
+      margin: 0;
+    }
+
+    /* Fare slider */
+    .slider-wrap { margin: 14px 0; }
+    .slider-wrap label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #6c63ff;
+      height: 4px;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .fare-display {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .fare-chip {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    .fare-chip.highlight {
+      border-color: rgba(108,99,255,0.4);
+      background: rgba(108,99,255,0.08);
+    }
+
+    .fare-chip .fc-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .fare-chip .fc-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .fare-chip.highlight .fc-val {
+      color: #6c63ff;
+    }
+
+    .offered-input-wrap {
+      position: relative;
+    }
+
+    .offered-input-wrap .rupee {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+      pointer-events: none;
+    }
+
+    .offered-input-wrap input {
+      padding-left: 32px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-2);
+      background: rgba(0,212,170,0.05);
+      border-color: rgba(0,212,170,0.3);
+    }
+
+    /* Active ride card */
+    .active-ride-card {
+      border-left: 4px solid var(--green);
+      border-radius: 16px;
+      background: rgba(34,197,94,0.05);
+      padding: 22px;
+      margin-top: 16px;
+    }
+
+    .active-ride-card h3 {
+      color: var(--green);
+      margin-bottom: 14px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .route-display {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+
+    .route-display .point {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .route-display .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-green { background: var(--green); }
+    .dot-red   { background: var(--red); }
+    .route-line {
+      width: 1px; height: 16px;
+      background: var(--border);
+      margin-left: 4px;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .info-pill {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .searching-anim {
+      text-align: center;
+      padding: 30px;
+    }
+
+    .searching-anim .ring {
+      width: 60px; height: 60px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    .cancel-btn {
+      background: transparent;
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444;
+      margin-top: 12px;
+    }
+
+    .cancel-btn:hover {
+      background: rgba(239,68,68,0.08);
+      box-shadow: none;
+    }
+
+    /* ── Google Maps ── */
+    #map {
+      width: 100%;
+      height: 300px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      margin: 18px 0 0;
+      overflow: hidden;
+      display: none;
+      background: #1a1a2e;
+    }
+    #map.visible { display: block; }
+
+    .map-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .map-label.visible { display: block; }
+
+    /* ── ETA Banner (Uber-style) ── */
+    .eta-banner {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,212,170,0.08));
+      border: 1px solid rgba(108,99,255,0.35);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin: 12px 0 0;
+      animation: fadeUp 0.4s ease both;
+    }
+    .eta-banner.visible { display: flex; }
+
+    .eta-icon {
+      width: 48px; height: 48px;
+      background: rgba(108,99,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      animation: carBounce 1.2s ease-in-out infinite;
+    }
+    @keyframes carBounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-4px); }
+    }
+
+    .eta-body { flex: 1; }
+    .eta-time {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .eta-time span { color: #6c63ff; }
+    .eta-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .eta-dist {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-2);
+      background: rgba(0,212,170,0.1);
+      border: 1px solid rgba(0,212,170,0.25);
+      border-radius: 20px;
+      padding: 5px 14px;
+      white-space: nowrap;
+    }
+
+    .live-pulse {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #22c55e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .live-pulse-dot {
+      width: 7px; height: 7px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse-green 1s infinite;
+    }
+
+    /* pulse marker for driver */
+    @keyframes pulse-marker {
+      0%   { box-shadow: 0 0 0 0 rgba(108,99,255,0.5); }
+      70%  { box-shadow: 0 0 0 12px rgba(108,99,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(108,99,255,0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">⚡ TripLink</div>
+    <div class="nav-links">
+      <span style="color:var(--text-muted);font-size:14px;">👋 <strong style="color:var(--text-primary);"><%= user.name %></strong></span>
+      <a href="/auth/logout">Logout</a>
+    </div>
+  </nav>
+
+  <% if (!activeRide) { %>
+
+  <!-- ─── BOOK A RIDE ─── -->
+  <div class="card" style="animation: fadeUp 0.5s ease both;">
+    <h2 style="margin-bottom:4px;">📍 Book a Ride</h2>
+    <p style="margin-bottom:20px;">Enter your route — we'll calculate the fare automatically.</p>
+
+    <!-- Step indicators -->
+    <div class="steps booking-steps" id="stepsBar">
+      <div class="step active" id="s1">1</div>
+      <div class="step-line"></div>
+      <div class="step" id="s2">2</div>
+      <div class="step-line"></div>
+      <div class="step" id="s3">3</div>
+    </div>
+
+    <!-- STEP 1: Route -->
+    <div id="step1">
+      <!-- Pickup with current location button -->
+      <div class="pickup-wrap">
+        <div class="pickup-field-row">
+          <input id="pickup" placeholder="📍 Pickup location (e.g. Rajpura, Punjab)" autocomplete="off">
+        </div>
+        <button class="loc-btn" id="locBtn" onclick="useCurrentLocation()" type="button">
+          <span class="loc-dot"></span>
+          <span id="locBtnText">Use current location</span>
+        </button>
+      </div>
+      <input id="drop" placeholder="🏁 Drop location (e.g. Patiala, Punjab)" autocomplete="off" style="margin-top:10px;">
+      <p style="font-size:12px;color:var(--text-muted);margin:6px 0 0;display:flex;align-items:center;gap:4px;">
+        <span style="opacity:0.6;">💡</span>
+        Include city/state for accuracy — e.g. <em>"Rajpura, Punjab"</em> not just <em>"Rajpura"</em>
+      </p>
+      <button onclick="calculateFare()" style="margin-top:14px;" id="getFareBtn">
+        Calculate Fare →
+      </button>
+    </div>
+
+
+    <!-- MAP (shown after fare calc) -->
+    <div id="map"></div>
+    <div class="map-label" id="mapLabel">🗺️ Route preview on Google Maps</div>
+
+    <!-- STEP 2: Fare & offer (hidden initially) -->
+    <div id="step2" style="display:none;">
+      <div class="fare-display" id="fareDisplay">
+        <div class="fare-chip">
+          <div class="fc-label">Distance</div>
+          <div class="fc-val" id="distVal">—</div>
+          <div style="font-size:11px;color:var(--text-muted);">km</div>
+        </div>
+        <div class="fare-chip highlight">
+          <div class="fc-label">Suggested Fare</div>
+          <div class="fc-val">₹<span id="estVal">—</span></div>
+        </div>
+        <div class="fare-chip" id="durationChip" style="display:none;">
+          <div class="fc-label">Travel Time</div>
+          <div class="fc-val" id="durationVal" style="font-size:16px;">—</div>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:var(--text-muted);margin:8px 0 12px;">
+        💡 Suggested fare is calculated as Base ₹30 + ₹12/km. You can offer more or less — driver decides!
+      </p>
+
+      <label style="font-size:13px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:8px;">
+        Your Offered Fare
+      </label>
+      <div class="offered-input-wrap">
+        <span class="rupee">₹</span>
+        <input type="number" id="offeredFare" min="1" placeholder="Enter your fare offer" style="font-size:20px;font-weight:700;">
+      </div>
+
+      <div class="slider-wrap">
+        <label>
+          <span>Less</span>
+          <span id="sliderVal" style="color:#6c63ff;font-weight:700;"></span>
+          <span>More</span>
+        </label>
+        <input type="range" id="fareSlider" min="10" max="1000" step="5">
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="btn-outline btn" onclick="resetStep()" style="flex:0.4;">← Back</button>
+        <button onclick="confirmRide()" style="flex:1;background:linear-gradient(135deg,#00d4aa,#16a34a);">
+          🚀 Request Ride
+        </button>
+      </div>
+    </div>
+
+    <!-- Hidden form for actual POST -->
+    <form id="rideForm" action="/ride/book" method="POST" style="display:none;">
+      <input type="hidden" name="pickup"      id="h_pickup">
+      <input type="hidden" name="drop"        id="h_drop">
+      <input type="hidden" name="offeredFare" id="h_fare">
+    </form>
+  </div>
+
+  <% } else { %>
+
+  <!-- ─── ACTIVE RIDE ─── -->
+  <div class="card" style="animation: fadeUp 0.5s ease both;">
+    <h2>🚗 Your Active Ride</h2>
+
+    <!-- Live Map for active ride -->
+    <div id="map" class="visible"></div>
+
+    <!-- ETA Banner (hidden until socket sends data) -->
+    <div class="eta-banner" id="etaBanner" <% if (activeRide.rideStatus === 'accepted') { %>style="display:flex;"<% } %>>
+      <div class="eta-icon">🚗</div>
+      <div class="eta-body">
+        <div class="live-pulse"><div class="live-pulse-dot"></div> Live Tracking</div>
+        <div class="eta-time">Arriving in <span id="etaTime">—</span></div>
+        <div class="eta-sub" id="etaSub">Waiting for driver location...</div>
+      </div>
+      <div class="eta-dist" id="etaDist">— away</div>
+    </div>
+
+    <!-- Static map label for non-tracking states -->
+    <div class="map-label visible" id="mapLabel" style="margin-top:8px;">
+      <% if (activeRide.rideStatus === 'started') { %>
+        🟢 Driver location updates every 5 seconds
+      <% } else if (activeRide.rideStatus === 'accepted') { %>
+        📍 Driver is on the way to pick you up
+      <% } else { %>
+        🗺️ Your route is shown on the map
+      <% } %>
+    </div>
+
+    <div class="active-ride-card">
+      <h3>
+        <% if (activeRide.rideStatus === 'pending') { %>
+          🔍 Searching for a driver...
+        <% } else if (activeRide.rideStatus === 'accepted') { %>
+          ✅ Driver Found!
+        <% } else if (activeRide.rideStatus === 'started') { %>
+          🚗 Ride in Progress!
+        <% } %>
+      </h3>
+
+      <div class="route-display">
+        <div class="point">
+          <div class="dot dot-green"></div>
+          <span><%= activeRide.pickup %></span>
+        </div>
+        <div class="route-line" style="margin-left:4px;"></div>
+        <div class="point">
+          <div class="dot dot-red"></div>
+          <span><%= activeRide.destination || activeRide.drop || '—' %></span>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-pill">📏 <%= activeRide.distanceKm || '—' %> km</span>
+        <span class="info-pill">💰 Offered: ₹<%= activeRide.offeredFare %></span>
+        <span class="info-pill">📊 Estimated: ₹<%= activeRide.estimatedFare %></span>
+        <span class="info-pill badge-<%= activeRide.rideStatus === 'accepted' ? 'green' : activeRide.rideStatus === 'started' ? 'green' : 'blue' %>">
+          <%= activeRide.rideStatus === 'accepted' ? '✅ Accepted' : activeRide.rideStatus === 'started' ? '🚗 Started' : '⏳ Pending' %>
+        </span>
+      </div>
+    </div>
+
+    <% if (activeRide.rideStatus === 'pending') { %>
+    <div class="searching-anim">
+      <div class="ring"></div>
+      <p>Waiting for a driver to accept your ₹<%= activeRide.offeredFare %> offer...</p>
+    </div>
+    <% } %>
+
+    <% if ((activeRide.rideStatus === 'accepted' || activeRide.rideStatus === 'started') && activeRide.driver) { %>
+    <div class="card" style="margin-top:14px;background:rgba(34,197,94,0.06);border-color:rgba(34,197,94,0.3);">
+      <h3 style="color:var(--green);">🚗 Driver Details</h3>
+      <p style="margin-top:8px;"><strong>Name:</strong> <%= activeRide.driver.name %></p>
+      <% if (activeRide.driver.phone) { %>
+      <p><strong>Phone:</strong> <%= activeRide.driver.phone %></p>
+      <% } %>
+    </div>
+    <% } %>
+
+    <% if (activeRide.rideStatus === 'accepted' && activeRide.rideOTP) { %>
+    <div class="card" style="margin-top:14px;background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.25);text-align:center;">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">Share this OTP with your driver to start the ride</p>
+      <div style="font-size:42px;font-weight:800;letter-spacing:10px;color:#34d399;font-family:'Outfit',sans-serif;"><%= activeRide.rideOTP %></div>
+    </div>
+    <% } %>
+  </div>
+
+  <% } %>
+
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast" style="display:none;">
+  <div class="toast-title" id="toastTitle"></div>
+  <div class="toast-msg"   id="toastMsg"></div>
+</div>
+
+<!-- Socket.io -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+socket.emit("join", "<%= user.id %>");
+
+function showToast(title, msg, type = "info") {
+  const t = document.getElementById("toast");
+  document.getElementById("toastTitle").textContent = title;
+  document.getElementById("toastMsg").textContent   = msg;
+  t.className = "toast " + type;
+  t.style.display = "block";
+  setTimeout(() => { t.style.display = "none"; }, 4500);
+}
+
+socket.on("rideAccepted", (data) => {
+  showToast("🎉 Ride Accepted!", `${data.driverName || "A driver"} accepted your ride!`, "success");
+  setTimeout(() => location.reload(), 2000);
+});
+
+socket.on("rideRejected", () => {
+  showToast("❌ Ride Rejected", "Driver rejected your offer. You can book again.", "error");
+  setTimeout(() => location.reload(), 2500);
+});
+
+socket.on("rideStatusUpdate", (data) => {
+  if (data.status === "STARTED" || data.status === "started") {
+    showToast("🚀 Ride Started!!", "Enjoy your trip. The map will update live.", "success");
+    // Reload to refresh the UI state from accepted to started
+    setTimeout(() => location.reload(), 2000);
+  } else if (data.status === "COMPLETED" || data.status === "completed") {
+    showToast("✅ Ride Completed!", "Please complete your payment.", "success");
+    showPaymentChoice();
+  } else if (data.status === "PAID" || data.status === "paid") {
+    showToast("🎉 Payment Received!", "Thank you for riding with TripLink!", "success");
+    setTimeout(() => location.reload(), 2000);
+  } else if (data.status === "CANCELLED" || data.status === "cancelled") {
+    showToast("❌ Ride Cancelled", "Your ride was cancelled.", "error");
+    setTimeout(() => location.reload(), 2500);
+  }
+});
+
+function showPaymentChoice() {
+  const amount = <%= activeRide ? activeRide.offeredFare : 0 %>;
+  
+  // Create a full-screen overlay for payment choice
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = "0"; overlay.style.left = "0"; overlay.style.width = "100%"; overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(15,23,42,0.85)";
+  overlay.style.backdropFilter = "blur(4px)";
+  overlay.style.zIndex = "9999";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.animation = "fadeUp 0.3s ease forwards";
+  
+  overlay.innerHTML = `
+    <div style="background:#1a1a2e; padding:30px; border-radius:16px; border:1px solid rgba(108,99,255,0.3); text-align:center; max-width:90%; width:340px; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+      <div style="font-size:40px; margin-bottom:10px;">🏁</div>
+      <h2 style="color:white; margin-bottom:8px;">Ride Completed!</h2>
+      <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px;">Please choose how you want to pay the fare of <strong style="color:var(--accent-2); font-size:18px;">₹${amount}</strong>.</p>
+      
+      <button id="btnOnline" style="width:100%; background:linear-gradient(135deg, #6c63ff, #4f46e5); color:white; border:none; padding:14px; border-radius:12px; font-weight:700; font-size:15px; margin-bottom:12px; cursor:pointer;">
+        💳 Pay Online (Razorpay)
+      </button>
+      
+      <button id="btnCash" style="width:100%; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#22c55e; padding:14px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer;">
+        💵 Pay in Cash
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  
+  document.getElementById("btnOnline").onclick = () => {
+    overlay.remove();
+    handlePayment();
+  };
+  
+  document.getElementById("btnCash").onclick = () => {
+    overlay.innerHTML = `
+      <div style="background:#1a1a2e; padding:30px; border-radius:16px; border:1px solid rgba(34,197,94,0.3); text-align:center; max-width:90%; width:340px;">
+        <div style="font-size:40px; margin-bottom:10px;">🤝</div>
+        <h2 style="color:white; margin-bottom:8px;">Thank You!</h2>
+        <p style="color:var(--text-muted); font-size:14px;">Please hand over <strong style="color:#22c55e;">₹${amount}</strong> to the driver.</p>
+      </div>
+    `;
+    setTimeout(() => location.reload(), 4000);
+  };
+}
+
+async function handlePayment() {
+  if (typeof ACTIVE_RIDE === 'undefined' || !ACTIVE_RIDE) return location.reload();
+  
+  try {
+    // We need the ride ID and fare.
+    const rideId = '<%= activeRide ? activeRide._id : "" %>';
+    const amount = <%= activeRide ? activeRide.offeredFare : 0 %>;
+    
+    if (!rideId || !amount) return location.reload();
+
+    const res = await fetch('/api/v1/payment/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, rideId })
+    });
+    const data = await res.json();
+    
+    if (data.error) {
+      showToast("⚠️ Payment Error", data.error, "error");
+      return setTimeout(() => location.reload(), 2500);
+    }
+    
+    const options = {
+      key: data.key,
+      amount: data.amount,
+      currency: data.currency,
+      name: "TripLink Ride",
+      description: "Payment for your ride",
+      order_id: data.orderId,
+      handler: async function (response) {
+        // Verify payment
+        try {
+          const verifyRes = await fetch('/api/v1/payment/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              rideId: rideId
+            })
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            showToast("✅ Payment Successful", "Thank you for riding with TripLink!", "success");
+            setTimeout(() => location.reload(), 2000);
+          } else {
+            showToast("❌ Verification Failed", "Payment verification failed.", "error");
+            setTimeout(() => location.reload(), 2000);
+          }
+        } catch(err) {
+          showToast("❌ Error", "Could not verify payment.", "error");
+          setTimeout(() => location.reload(), 2000);
+        }
+      },
+      theme: { color: "#6c63ff" }
+    };
+    
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function (response){
+      showToast("❌ Payment Failed", response.error.description, "error");
+    });
+    rzp.open();
+    
+  } catch (err) {
+    console.error("Payment error:", err);
+    showToast("⚠️ Error", "Failed to initiate payment", "error");
+    setTimeout(() => location.reload(), 2500);
+  }
+}
+</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     Google Maps Integration
+════════════════════════════════════════════════════════════ -->
+<script>
+// ── Globals ──────────────────────────────────────────────────
+let mapInstance   = null;
+let directionsRenderer = null;
+let driverMarker  = null;
+let pickupMarker  = null;
+let dropMarker    = null;
+
+// EJS server-side data
+const ACTIVE_RIDE = <%- JSON.stringify(activeRide ? {
+  pickup:      activeRide.pickup,
+  drop:        activeRide.destination || activeRide.drop || '',
+  destination: activeRide.destination || activeRide.drop || '',
+  status:      activeRide.rideStatus
+} : null) %>;
+
+// ── Called by Google Maps script once loaded ──────────────────
+function initMap() {
+  const mapEl = document.getElementById("map");
+  if (!mapEl) return;
+
+  mapInstance = new google.maps.Map(mapEl, {
+    zoom: 13,
+    center: { lat: 28.6139, lng: 77.2090 }, // Default: New Delhi
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: [
+      { elementType: "geometry",        stylers: [{ color: "#1a1a2e" }] },
+      { elementType: "labels.text.fill",stylers: [{ color: "#8d9db5" }] },
+      { elementType: "labels.text.stroke",stylers:[{ color: "#1a1a2e" }] },
+      { featureType: "road",            elementType: "geometry", stylers: [{ color: "#2d2d44" }] },
+      { featureType: "road",            elementType: "geometry.stroke", stylers: [{ color: "#1a1a2e" }] },
+      { featureType: "road.highway",    elementType: "geometry", stylers: [{ color: "#3a3a5c" }] },
+      { featureType: "water",           elementType: "geometry", stylers: [{ color: "#0d1117" }] },
+      { featureType: "poi",             stylers: [{ visibility: "off" }] },
+      { featureType: "transit",         stylers: [{ visibility: "off" }] }
+    ]
+  });
+
+  directionsRenderer = new google.maps.DirectionsRenderer({
+    suppressMarkers: false,
+    polylineOptions: {
+      strokeColor: "#6c63ff",
+      strokeWeight: 5,
+      strokeOpacity: 0.85
+    }
+  });
+  directionsRenderer.setMap(mapInstance);
+
+  // If there's an active ride, show its route immediately
+  if (ACTIVE_RIDE) {
+    showRoute(ACTIVE_RIDE.pickup, ACTIVE_RIDE.drop);
+  }
+}
+
+// ── Draw route between two address strings ────────────────────
+function showRoute(from, to) {
+  if (!mapInstance) return;
+  const ds = new google.maps.DirectionsService();
+  ds.route({
+    origin:      from,
+    destination: to,
+    travelMode:  google.maps.TravelMode.DRIVING
+  }, (result, status) => {
+    if (status === "OK") {
+      directionsRenderer.setDirections(result);
+    } else {
+      console.warn("Directions failed:", status);
+      // fallback: geocode both and center
+      geocodeAndCenter(from, to);
+    }
+  });
+}
+
+// ── Fallback: just geocode & drop markers ────────────────────
+function geocodeAndCenter(from, to) {
+  const gc = new google.maps.Geocoder();
+  gc.geocode({ address: from }, (res, st) => {
+    if (st === "OK") {
+      mapInstance.setCenter(res[0].geometry.location);
+      new google.maps.Marker({ position: res[0].geometry.location, map: mapInstance, label: "A" });
+    }
+  });
+  gc.geocode({ address: to }, (res, st) => {
+    if (st === "OK") {
+      new google.maps.Marker({ position: res[0].geometry.location, map: mapInstance, label: "B" });
+    }
+  });
+}
+
+// ── Update / animate driver marker (real-time) ───────────────
+function updateDriverMarker(lat, lng) {
+  if (!mapInstance) {
+    console.warn("⚠️ Map not ready yet for driver marker");
+    return;
+  }
+  const pos = { lat, lng };
+
+  if (!driverMarker) {
+    // Create a custom car emoji marker using AdvancedMarkerElement if available
+    // Fallback: standard Marker with car icon
+    driverMarker = new google.maps.Marker({
+      position: pos,
+      map: mapInstance,
+      title: "Driver",
+      icon: {
+        url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="18" fill="#6c63ff" stroke="#ffffff" stroke-width="2"/>
+            <text x="20" y="26" text-anchor="middle" font-size="18">🚗</text>
+          </svg>
+        `),
+        scaledSize: new google.maps.Size(40, 40),
+        anchor: new google.maps.Point(20, 20),
+      },
+      animation: google.maps.Animation.DROP,
+      zIndex: 999,
+    });
+    console.log("📍 Driver marker created at", lat, lng);
+  } else {
+    driverMarker.setPosition(pos);
+    console.log("📍 Driver marker moved to", lat, lng);
+  }
+
+  // Smoothly pan & zoom to driver location
+  mapInstance.panTo(pos);
+  if (mapInstance.getZoom() < 14) {
+    mapInstance.setZoom(15);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// CURRENT LOCATION: detect GPS → reverse geocode → fill pickup
+// ─────────────────────────────────────────────────────────────
+async function useCurrentLocation() {
+  const btn     = document.getElementById("locBtn");
+  const btnText = document.getElementById("locBtnText");
+  const input   = document.getElementById("pickup");
+
+  if (!navigator.geolocation) {
+    showToast("⚠️ Not Supported", "Your browser doesn't support location detection.", "error");
+    return;
+  }
+
+  // ── Detecting state ────────────────────────────────────────
+  btn.disabled = true;
+  btn.className = "loc-btn detecting";
+  btnText.textContent = "Detecting…";
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+      console.log(`📍 GPS: ${lat}, ${lng} (±${Math.round(accuracy)}m)`);
+
+      try {
+        // ── Reverse geocode via OSM Nominatim (free) ─────────
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=16&addressdetails=1`;
+        const res  = await fetch(url, { headers: { "User-Agent": "TripLink/1.0" } });
+        const data = await res.json();
+
+        // Build a clean address from components
+        const addr = data.address || {};
+        const parts = [
+          addr.road || addr.pedestrian || addr.suburb,
+          addr.city || addr.town || addr.village || addr.county,
+          addr.state_district || addr.state,
+        ].filter(Boolean);
+
+        const placeName = parts.length
+          ? parts.join(", ")
+          : data.display_name?.split(",").slice(0, 3).join(",").trim();
+
+        input.value = placeName || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+        // Success state (holds 3s then resets)
+        btn.className = "loc-btn success";
+        btnText.textContent = "📍 Location set!";
+        btn.disabled = false;
+        input.focus();
+
+        // Briefly highlight the input
+        input.style.borderColor = "rgba(34,197,94,0.6)";
+        input.style.background  = "rgba(34,197,94,0.05)";
+        setTimeout(() => {
+          input.style.borderColor = "";
+          input.style.background  = "";
+          btn.className   = "loc-btn";
+          btnText.textContent = "Use current location";
+        }, 3000);
+
+      } catch (geocodeErr) {
+        console.warn("Reverse geocode failed, using raw coordinates:", geocodeErr);
+        // Still useful — fill with lat,lng so fareService can try
+        input.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        btn.className = "loc-btn success";
+        btnText.textContent = "📍 Coordinates set";
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.className   = "loc-btn";
+          btnText.textContent = "Use current location";
+        }, 3000);
+      }
+    },
+    (err) => {
+      // ── Error state ────────────────────────────────────────
+      btn.className = "loc-btn error";
+      btn.disabled  = false;
+      const msgs = {
+        1: "Location access denied. Please allow it in browser settings.",
+        2: "Location unavailable. Check your device's GPS.",
+        3: "Location request timed out. Try again.",
+      };
+      btnText.textContent = "Try again";
+      showToast("📍 Location Error", msgs[err.code] || "Could not detect location.", "error");
+      setTimeout(() => {
+        btn.className   = "loc-btn";
+        btnText.textContent = "Use current location";
+      }, 4000);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// BOOKING FLOW: show map after fare calculation
+// ─────────────────────────────────────────────────────────────
+let calculatedEst = 0;
+
+
+async function calculateFare() {
+  const pickup = document.getElementById("pickup").value.trim();
+  const drop   = document.getElementById("drop").value.trim();
+
+  if (!pickup || !drop) {
+    showToast("⚠️ Missing Info", "Please enter both pickup and drop locations.", "error");
+    return;
+  }
+
+  const btn = document.getElementById("getFareBtn");
+  btn.textContent = "Calculating...";
+  btn.disabled = true;
+
+  try {
+    const res  = await fetch(`/ride/fare?pickup=${encodeURIComponent(pickup)}&drop=${encodeURIComponent(drop)}`);
+    const data = await res.json();
+
+    if (data.error) {
+      showToast("⚠️ Error", data.error, "error");
+      btn.textContent = "Calculate Fare →";
+      btn.disabled = false;
+      return;
+    }
+
+    calculatedEst = data.estimatedFare;
+
+    document.getElementById("distVal").textContent = data.distanceKm;
+    document.getElementById("estVal").textContent  = data.estimatedFare;
+
+    // Show travel time chip if available
+    if (data.durationText) {
+      document.getElementById("durationVal").textContent  = data.durationText;
+      document.getElementById("durationChip").style.display = "";
+      // Make the grid 3 columns
+      document.getElementById("fareDisplay").style.gridTemplateColumns = "1fr 1fr 1fr";
+    }
+
+    // Pre-fill offered fare = suggested
+    document.getElementById("offeredFare").value = data.estimatedFare;
+    const slider = document.getElementById("fareSlider");
+    slider.min   = Math.max(10, Math.round(data.estimatedFare * 0.5));
+    slider.max   = Math.round(data.estimatedFare * 2);
+    slider.value = data.estimatedFare;
+    document.getElementById("sliderVal").textContent = "₹" + data.estimatedFare;
+
+    // ── Show map & draw route ──
+    const mapEl   = document.getElementById("map");
+    const mapLbl  = document.getElementById("mapLabel");
+    mapEl.classList.add("visible");
+    mapLbl.classList.add("visible");
+    if (mapInstance) {
+      showRoute(pickup, drop);
+    }
+
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("step2").style.display = "block";
+
+    // Update step indicators
+    document.getElementById("s1").classList.remove("active");
+    document.getElementById("s1").classList.add("done");
+    document.getElementById("s1").textContent = "✓";
+    document.getElementById("s2").classList.add("active");
+
+  } catch (e) {
+    showToast("⚠️ Error", "Could not calculate fare.", "error");
+    btn.textContent = "Calculate Fare →";
+    btn.disabled = false;
+  }
+}
+
+// Sync slider ↔ input
+document.addEventListener("DOMContentLoaded", () => {
+  const slider = document.getElementById("fareSlider");
+  const input  = document.getElementById("offeredFare");
+  const label  = document.getElementById("sliderVal");
+
+  if (!slider) return;
+
+  slider.addEventListener("input", () => {
+    const v = parseInt(slider.value);
+    input.value  = v;
+    label.textContent = "₹" + v;
+  });
+
+  input.addEventListener("input", () => {
+    const v = parseInt(input.value) || 0;
+    if (v >= parseInt(slider.min) && v <= parseInt(slider.max)) {
+      slider.value = v;
+      label.textContent = "₹" + v;
+    }
+  });
+});
+
+function resetStep() {
+  document.getElementById("step1").style.display = "block";
+  document.getElementById("step2").style.display = "none";
+  document.getElementById("getFareBtn").textContent = "Calculate Fare →";
+  document.getElementById("getFareBtn").disabled = false;
+  document.getElementById("s2").classList.remove("active");
+  document.getElementById("s1").classList.remove("done");
+  document.getElementById("s1").classList.add("active");
+  document.getElementById("s1").textContent = "1";
+  // Hide map
+  document.getElementById("map").classList.remove("visible");
+  document.getElementById("mapLabel").classList.remove("visible");
+}
+
+function confirmRide() {
+  const pickup  = document.getElementById("pickup").value.trim();
+  const drop    = document.getElementById("drop").value.trim();
+  const offered = parseInt(document.getElementById("offeredFare").value);
+
+  if (!offered || offered < 1) {
+    showToast("⚠️ Invalid Fare", "Please enter a valid fare amount.", "error");
+    return;
+  }
+
+  document.getElementById("h_pickup").value = pickup;
+  document.getElementById("h_drop").value   = drop;
+  document.getElementById("h_fare").value   = offered;
+
+  // Update step 3
+  document.getElementById("s2").classList.remove("active");
+  document.getElementById("s2").classList.add("done");
+  document.getElementById("s2").textContent = "✓";
+  document.getElementById("s3").classList.add("active");
+
+  document.getElementById("rideForm").submit();
+}
+
+// ─────────────────────────────────────────────────────────────
+// REAL-TIME: driver location → move marker + compute ETA client-side
+// ─────────────────────────────────────────────────────────────
+let etaThrottle = 0; // only call Maps every 15s max
+
+socket.on("update-driver-location", (data) => {
+  console.log("📍 Rider received driver location:", data);
+  if (!data.lat || !data.lng) return;
+
+  updateDriverMarker(data.lat, data.lng);
+
+  // Show ETA banner immediately only if ride is accepted (driver on the way)
+  const banner = document.getElementById("etaBanner");
+  if (banner && ACTIVE_RIDE.status === 'accepted') banner.style.display = "flex";
+
+  // Compute ETA client-side via Google Maps DistanceMatrixService
+  // (Maps JS API is enabled — no backend call needed)
+  const now = Date.now();
+  if (now - etaThrottle < 15000) return;  // throttle to every 15s
+  etaThrottle = now;
+
+  if (!ACTIVE_RIDE || !mapInstance || typeof google === 'undefined') return;
+
+  // Pickup = where driver is going to. Destination = where rider is going after.
+  // For "Arriving in ___" — driver → rider's PICKUP location
+  const targetAddr = ACTIVE_RIDE.pickup;
+  if (!targetAddr) return;
+
+  const service = new google.maps.DistanceMatrixService();
+  service.getDistanceMatrix({
+    origins:      [{ lat: data.lat, lng: data.lng }],
+    destinations: [targetAddr],
+    travelMode:   google.maps.TravelMode.DRIVING,
+    unitSystem:   google.maps.UnitSystem.METRIC,
+  }, (response, status) => {
+    if (status !== 'OK') {
+      console.warn('Client ETA error:', status);
+      return;
+    }
+    const elem = response.rows?.[0]?.elements?.[0];
+    if (!elem || elem.status !== 'OK') return;
+
+    const durationText  = elem.duration.text;   // e.g. "12 mins"
+    const durationSec   = elem.duration.value;  // seconds
+    const distanceText  = elem.distance.text;   // e.g. "3.2 km"
+
+    // Update ETA banner
+    const etaTime = document.getElementById('etaTime');
+    const etaSub  = document.getElementById('etaSub');
+    const etaDist = document.getElementById('etaDist');
+
+    if (etaTime) etaTime.textContent = durationText;
+    if (etaDist) etaDist.textContent = distanceText + ' away';
+
+    if (etaSub) {
+      if (durationSec <= 60) {
+        etaSub.textContent = 'Driver is almost here! 🎉';
+        if (banner) banner.style.borderColor = 'rgba(34,197,94,0.6)';
+      } else if (durationSec <= 300) {
+        etaSub.textContent = 'Driver is nearby — be ready!';
+      } else {
+        etaSub.textContent = 'Driver is on the way to your pickup';
+      }
+    }
+
+    console.log(`🕐 ETA: ${durationText} | ${distanceText}`);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// REAL-TIME: ETA from server (fallback — used if server computes it)
+// ─────────────────────────────────────────────────────────────
+socket.on("eta-update", (data) => {
+  const banner  = document.getElementById("etaBanner");
+  const etaTime = document.getElementById("etaTime");
+  const etaSub  = document.getElementById("etaSub");
+  const etaDist = document.getElementById("etaDist");
+
+  if (!banner) return;
+
+  // Show banner
+  banner.classList.add("visible");
+
+  // Fill ETA time
+  if (data.durationText) {
+    etaTime.textContent = data.durationText;
+  }
+
+  // Fill sub-label
+  if (data.durationSec <= 60) {
+    etaSub.textContent = "Driver is almost here! 🎉";
+    banner.style.borderColor = "rgba(34,197,94,0.6)";
+    banner.style.background  = "linear-gradient(135deg,rgba(34,197,94,0.15),rgba(0,212,170,0.08))";
+  } else if (data.durationSec <= 300) {
+    etaSub.textContent = "Driver is nearby — be ready!";
+  } else {
+    etaSub.textContent = "Driver is on the way";
+  }
+
+  // Fill distance away
+  if (data.distanceText) {
+    etaDist.textContent = data.distanceText + " away";
+  }
+});
+</script>
+
+<!-- Load Google Maps JS API last (calls initMap callback) -->
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsKey %>&callback=initMap"
+  async defer>
+</script>
+
+<!-- ════════════════════════════════════════════════════════════
+     Rider GPS Broadcaster
+     Runs only when ride is accepted or started
+     Sends rider's live location to driver via socket
+════════════════════════════════════════════════════════════ -->
+<script>
+// Server-side injected active ride data
+const RIDER_ACTIVE_RIDE = <%- JSON.stringify(activeRide ? {
+  _id:      activeRide._id.toString(),
+  driverId: activeRide.driver
+              ? (activeRide.driver._id
+                  ? activeRide.driver._id.toString()
+                  : activeRide.driver.toString())
+              : null,
+  status: activeRide.rideStatus
+} : null) %>;
+
+console.log("🧍 Rider ACTIVE_RIDE_DATA:", RIDER_ACTIVE_RIDE);
+
+let riderWatchId = null;
+
+function startRiderLocationBroadcast() {
+  if (!RIDER_ACTIVE_RIDE) {
+    console.log("⚠️ No active ride — rider GPS broadcast skipped");
+    return;
+  }
+  if (!["accepted", "started"].includes(RIDER_ACTIVE_RIDE.status)) {
+    console.log("⚠️ Ride not accepted/started yet:", RIDER_ACTIVE_RIDE.status);
+    return;
+  }
+  if (!RIDER_ACTIVE_RIDE.driverId) {
+    console.warn("⚠️ driverId missing — rider location won't reach driver");
+    return;
+  }
+  if (!navigator.geolocation) {
+    console.warn("⚠️ Geolocation not supported on this device");
+    return;
+  }
+
+  console.log("📡 Starting rider GPS broadcast to driver:", RIDER_ACTIVE_RIDE.driverId);
+
+  let lastPos = null;
+
+  const emitRiderLocation = (position) => {
+    lastPos = position;
+    const { latitude: lat, longitude: lng } = position.coords;
+    console.log(`🧍 Rider location → driver: lat=${lat}, lng=${lng}`);
+    socket.emit("rider-location", {
+      rideId:   RIDER_ACTIVE_RIDE._id,
+      driverId: RIDER_ACTIVE_RIDE.driverId,
+      lat,
+      lng,
+    });
+  };
+
+  const onError = (err) => {
+    console.warn("❌ Rider geolocation error:", err.message);
+  };
+
+  const geoOpts = { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 };
+
+  // Emit once immediately
+  navigator.geolocation.getCurrentPosition(emitRiderLocation, onError, geoOpts);
+
+  // Then watch continuously
+  riderWatchId = navigator.geolocation.watchPosition(emitRiderLocation, onError, geoOpts);
+
+  // Resend every 5s as backup
+  setInterval(() => {
+    if (lastPos) emitRiderLocation(lastPos);
+  }, 5000);
+}
+
+startRiderLocationBroadcast();
+
+window.addEventListener("beforeunload", () => {
+  if (riderWatchId !== null) {
+    navigator.geolocation.clearWatch(riderWatchId);
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+node_modules/
+.env
+logs/
+*.log
+coverage/
+dist/
+.DS_Store
+Thumbs.db
+uploads/temp/
+prisma/migrations/*.sql
+
+/src/generated/prisma

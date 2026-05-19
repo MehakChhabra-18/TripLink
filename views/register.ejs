@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register – TripLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+    .auth-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .auth-card h1 {
+      font-size: 26px;
+      margin-bottom: 6px;
+      color: #38bdf8;
+    }
+    .auth-card .subtitle {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .error-msg {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fca5a5;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+      margin-top: 14px;
+    }
+    .role-tabs {
+      display: flex;
+      gap: 10px;
+      margin: 14px 0 4px;
+    }
+    .role-tab {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background: #1e293b;
+      color: #94a3b8;
+      cursor: pointer;
+      text-align: center;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .role-tab.active {
+      border-color: #38bdf8;
+      color: #38bdf8;
+      background: rgba(56,189,248,0.1);
+    }
+    #carFields {
+      display: none;
+      padding: 14px;
+      border-radius: 10px;
+      background: rgba(56,189,248,0.05);
+      border: 1px solid rgba(56,189,248,0.15);
+      margin-top: 12px;
+    }
+    #carFields label { margin-top: 8px; }
+    .auth-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .auth-link a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    .auth-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <h1>🚗 TripLink</h1>
+    <p class="subtitle">Create your account</p>
+
+    <% if (error) { %>
+      <div class="error-msg">⚠️ <%= error %></div>
+    <% } %>
+
+    <form action="/auth/register" method="POST" enctype="multipart/form-data">
+      <label>Full Name</label>
+      <input type="text" name="name" placeholder="John Doe" required />
+
+      <label>Email Address</label>
+      <input type="email" name="email" placeholder="you@example.com" required />
+
+      <label>Password</label>
+      <input type="password" name="password" placeholder="••••••••" required />
+
+      <label>Phone Number</label>
+      <input type="text" name="phone" placeholder="+91 98765 43210" />
+
+      <label>Profile Picture (Optional)</label>
+      <input type="file" name="profileImage" accept="image/*" style="padding: 10px; background: rgba(0,0,0,0.2);" />
+
+      <label>Register as</label>
+      <div class="role-tabs">
+        <div class="role-tab active" onclick="selectRole('rider', this)">🛵 Rider</div>
+        <div class="role-tab" onclick="selectRole('driver', this)">🚗 Driver</div>
+      </div>
+      <input type="hidden" name="role" id="roleInput" value="rider" />
+
+      <div id="carFields">
+        <label>Car Model</label>
+        <input type="text" name="carModel" placeholder="e.g. Honda City" />
+        <label>Car Number</label>
+        <input type="text" name="carNumber" placeholder="e.g. DL 01 AB 1234" />
+        
+        <label>Driver's License (Image/PDF)</label>
+        <input type="file" name="license" accept="image/*,application/pdf" style="padding: 10px; background: rgba(0,0,0,0.2);" />
+
+        <label>RC Document (Image/PDF)</label>
+        <input type="file" name="rcDocument" accept="image/*,application/pdf" style="padding: 10px; background: rgba(0,0,0,0.2);" />
+
+        <label>Vehicle Image (Required for Drivers)</label>
+        <input type="file" name="vehicleImage" accept="image/*" style="padding: 10px; background: rgba(0,0,0,0.2);" />
+      </div>
+
+      <button type="submit" style="margin-top: 22px;">Create Account →</button>
+    </form>
+
+    <div class="auth-link">
+      Already have an account? <a href="/auth/login">Login here</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function selectRole(role, el) {
+    document.querySelectorAll(".role-tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+    document.getElementById("roleInput").value = role;
+    document.getElementById("carFields").style.display = role === "driver" ? "block" : "none";
+  }
+</script>
+</body>
+</html>
