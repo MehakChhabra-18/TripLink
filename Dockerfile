@@ -1,36 +1,45 @@
-# ─────────────────────────────────────────────────────────────
-# TripLink Backend — Render-Ready Docker Image (Prisma v5)
-# ─────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# TripLink Backend — Stable Prisma Dockerfile
+# ─────────────────────────────────────────────
 
-FROM node:20-alpine
+# ===== Builder Stage =====
+FROM node:20 AS builder
 
 WORKDIR /app
-
-# Install native build tools (needed for bcrypt)
-RUN apk add --no-cache python3 make g++
 
 # Copy package files
 COPY package*.json ./
 
-# Copy prisma schema BEFORE npm install
-# postinstall runs `prisma generate --schema=./prisma/schema.prisma`
-COPY prisma ./prisma
-
-# Install all deps (postinstall: prisma generate runs here)
+# Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy rest of source files
+# Copy project files
 COPY . .
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S triplink -u 1001
+# Generate Prisma Client
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
+# ===== Production Stage =====
+FROM node:20 AS production
+
+WORKDIR /app
+
+# Create non-root user
+RUN groupadd -r nodejs && useradd -r -g nodejs triplink
+
+# Copy files
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package.json ./package.json
+
+# Use non-root user
 USER triplink
 
 EXPOSE 3000
 
+# Health Check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
+CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
 CMD ["node", "src/server.js"]
