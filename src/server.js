@@ -47,7 +47,8 @@ const io = new Server(server, {
   pingTimeout:  5000,
 });
 
-// Make io accessible from controllers via app.get("io")
+// Make io accessible from controllers via app.get("io") and global.io
+global.io = io;
 app.set("io", io);
 
 // Initialize all socket handlers

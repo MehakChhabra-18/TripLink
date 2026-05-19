@@ -11,7 +11,11 @@ const mapRideToMongoose = (r) => {
     pickup: r.pickupAddress,
     rideStatus: r.status.toLowerCase(),
     paymentStatus: r.paymentStatus.toLowerCase(),
-    rider: r.rider?.user ? { name: r.rider.user.name, phone: r.rider.user.phone } : null
+    rider: r.rider?.user ? { 
+      _id: r.rider.userId,
+      name: r.rider.user.name, 
+      phone: r.rider.user.phone 
+    } : null
   };
 };
 
