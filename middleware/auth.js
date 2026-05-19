@@ -44,7 +44,7 @@ const dualAuth = (req, res, next) => {
     }
   }
 
-  if (req.session.user) {
+  if (req.session?.user) {
     req.user = {
       id:   req.session.user.id,
       name: req.session.user.name,
@@ -53,7 +53,10 @@ const dualAuth = (req, res, next) => {
     return next();
   }
 
-  res.status(401).json({ error: "Authentication required" });
+  if (req.headers.accept?.includes("application/json") || req.path.startsWith("/api/")) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  res.redirect("/auth/login");
 };
 
 // ─── ROLE GUARD ───────────────────────────────────────────────────────────────

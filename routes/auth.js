@@ -1,12 +1,14 @@
 const express = require("express");
 const router  = express.Router();
 const auth    = require("../controllers/authController");
+const multer  = require("multer");
+const upload  = multer();
 
 // ─── EJS / SSR Routes ─────────────────────────────────────────────────────────
 router.get("/register", (req, res) => res.render("register", { error: null }));
 router.get("/login",    (req, res) => res.render("login",    { error: null }));
 
-router.post("/register", auth.register);
+router.post("/register", upload.any(), auth.register);
 router.post("/login",    auth.login);
 
 router.get("/logout", auth.logout);
