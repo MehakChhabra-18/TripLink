@@ -11,7 +11,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Generate Prisma client
-RUN npx prisma generate --schema=./src/prisma/schema.prisma
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # ─── Production image ─────────────────────────────────────────────────────────
 FROM node:20-alpine AS production
