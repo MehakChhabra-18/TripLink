@@ -1,58 +1,37 @@
 # ─────────────────────────────────────────────────────────────
 # TripLink Backend — Render-Ready Docker Image
+# Single-stage build (avoids multi-stage copy issues)
 # ─────────────────────────────────────────────────────────────
 
-# ===== Builder Stage =====
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Install build tools needed for native modules (bcrypt)
+# Install native build tools (needed for bcrypt)
 RUN apk add --no-cache python3 make g++
 
-# Copy package files first (layer cache)
+# Copy package files
 COPY package*.json ./
 
-# Copy prisma schema BEFORE install (needed by postinstall → prisma generate)
+# Copy prisma schema BEFORE npm install
+# (postinstall runs `prisma generate` which needs the schema)
 COPY prisma ./prisma
-COPY prisma.config.ts ./prisma.config.ts
+COPY prisma.config.js ./prisma.config.js
 
-# Install deps — skip postinstall to avoid prisma generate running too early
-RUN npm install --legacy-peer-deps --ignore-scripts
+# Install all dependencies (postinstall: prisma generate runs here)
+RUN npm install --legacy-peer-deps
 
-# Rebuild native modules (bcrypt, etc.) now that build tools are present
-RUN npm rebuild
-
-# Copy all remaining source files
+# Copy rest of source files
 COPY . .
-
-# Generate Prisma Client (all files are present now)
-RUN npx prisma generate
-
-# ===== Production Stage =====
-FROM node:20-alpine AS production
-
-WORKDIR /app
-
-# Install runtime libs for native modules
-RUN apk add --no-cache python3 make g++
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S triplink -u 1001
 
-# Copy built artifacts from builder
-COPY --from=builder /app/node_modules    ./node_modules
-COPY --from=builder /app/src             ./src
-COPY --from=builder /app/prisma          ./prisma
-COPY --from=builder /app/package.json    ./package.json
-
-# Use non-root user
 USER triplink
 
 EXPOSE 3000
 
-# Health Check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 

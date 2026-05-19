@@ -1,13 +1,288 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// ============================================================
+// TripLink - Prisma Schema  (Prisma v7)
+// Database: PostgreSQL
+// NOTE: `url` removed from datasource — Prisma v7 requirement.
+//       URL is passed via PrismaClient constructor (datasources option)
+//       and via prisma.config.js for migrations.
+// ============================================================
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  RIDER
+  DRIVER
+  ADMIN
+}
+
+enum RideStatus {
+  PENDING
+  ACCEPTED
+  STARTED
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum OTPType {
+  EMAIL
+  PHONE
+}
+
+enum OTPPurpose {
+  REGISTRATION
+  LOGIN
+  RIDE_START
+  PASSWORD_RESET
+}
+
+enum VehicleType {
+  BIKE
+  AUTO
+  CAR
+  SUV
+  LUXURY
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+// ─── User Model ───────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone        String?  @unique
+  password     String
+  role         Role     @default(RIDER)
+  isVerified   Boolean  @default(false)
+  profileImage String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  rider         Rider?
+  driver        Driver?
+  otps          OTP[]
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@map("users")
+}
+
+// ─── Rider Profile ────────────────────────────────────────────────────────────
+
+model Rider {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rides Ride[] @relation("RiderRides")
+
+  @@map("riders")
+}
+
+// ─── Driver Profile ───────────────────────────────────────────────────────────
+
+model Driver {
+  id                 String             @id @default(uuid())
+  userId             String             @unique
+  licenseNumber      String?
+  licenseImage       String?
+  isAvailable        Boolean            @default(false)
+  isOnline           Boolean            @default(false)
+  currentLat         Float?
+  currentLng         Float?
+  rating             Float              @default(5.0)
+  totalRides         Int                @default(0)
+  totalEarnings      Float              @default(0.0)
+  verificationStatus VerificationStatus @default(PENDING)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicles Vehicle[]
+  rides    Ride[]    @relation("DriverRides")
+
+  @@index([isAvailable])
+  @@index([isOnline])
+  @@map("drivers")
+}
+
+// ─── Vehicle Model ────────────────────────────────────────────────────────────
+
+model Vehicle {
+  id                 String             @id @default(uuid())
+  driverId           String
+  vehicleType        VehicleType        @default(CAR)
+  make               String
+  model              String
+  year               Int
+  color              String
+  licensePlate       String             @unique
+  rcDocument         String?
+  vehicleImage       String?
+  isActive           Boolean            @default(true)
+  verificationStatus VerificationStatus @default(PENDING)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  rides  Ride[]
+
+  @@index([driverId])
+  @@map("vehicles")
+}
+
+// ─── Ride Model ───────────────────────────────────────────────────────────────
+
+model Ride {
+  id        String  @id @default(uuid())
+  riderId   String
+  driverId  String?
+  vehicleId String?
+
+  pickupAddress      String
+  pickupLat          Float?
+  pickupLng          Float?
+  destinationAddress String
+  destinationLat     Float?
+  destinationLng     Float?
+
+  distanceKm    Float @default(0)
+  estimatedFare Float @default(0)
+  offeredFare   Float @default(0)
+  finalFare     Float?
+
+  status        RideStatus    @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  rideOTP     String?
+  otpVerified Boolean @default(false)
+
+  acceptedAt  DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  rider    Rider    @relation("RiderRides", fields: [riderId], references: [id])
+  driver   Driver?  @relation("DriverRides", fields: [driverId], references: [id])
+  vehicle  Vehicle? @relation(fields: [vehicleId], references: [id])
+  payment  Payment?
+  tracking RideTracking[]
+
+  @@index([riderId])
+  @@index([driverId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("rides")
+}
+
+// ─── Payment Model ────────────────────────────────────────────────────────────
+
+model Payment {
+  id                String        @id @default(uuid())
+  rideId            String        @unique
+  amount            Float
+  currency          String        @default("INR")
+  status            PaymentStatus @default(PENDING)
+
+  razorpayOrderId   String? @unique
+  razorpayPaymentId String? @unique
+  razorpaySignature String?
+
+  refundId     String?
+  refundAmount Float?
+  refundedAt   DateTime?
+
+  failureReason String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  ride Ride @relation(fields: [rideId], references: [id])
+
+  @@index([rideId])
+  @@index([razorpayOrderId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ─── OTP Model ────────────────────────────────────────────────────────────────
+
+model OTP {
+  id        String     @id @default(uuid())
+  userId    String
+  code      String
+  type      OTPType    @default(EMAIL)
+  purpose   OTPPurpose @default(LOGIN)
+  expiresAt DateTime
+  isUsed    Boolean    @default(false)
+  attempts  Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("otps")
+}
+
+// ─── Refresh Token Model ──────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ─── Ride Tracking Model ──────────────────────────────────────────────────────
+
+model RideTracking {
+  id        String   @id @default(uuid())
+  rideId    String
+  lat       Float
+  lng       Float
+  speed     Float?
+  heading   Float?
+  timestamp DateTime @default(now())
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@index([rideId])
+  @@index([timestamp])
+  @@map("ride_tracking")
 }
