@@ -146,11 +146,15 @@ exports.updateRideStatus = async (req, res) => {
       global.io?.to(ride.rider.userId).emit("rideStatusUpdate", { status, rideId: ride.id });
     }
 
-    if (req.headers.accept?.includes("application/json")) return res.json({ ride: mappedRide });
+    if (req.headers.accept?.includes("application/json") || req.method === "PUT" || req.headers["content-type"] === "application/json") {
+      return res.json({ success: true, ride: mappedRide });
+    }
     res.redirect("/driver/dashboard");
   } catch (err) {
     console.error("updateRideStatus error:", err);
-    if (req.headers.accept?.includes("application/json")) return res.status(500).json({ error: err.message });
+    if (req.headers.accept?.includes("application/json") || req.method === "PUT" || req.headers["content-type"] === "application/json") {
+      return res.status(500).json({ error: err.message });
+    }
     res.redirect("/driver/dashboard");
   }
 };
