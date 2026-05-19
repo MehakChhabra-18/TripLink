@@ -67,12 +67,21 @@ const errorHandler = (err, req, res, next) => {
     code       = "UNEXPECTED_FILE";
   }
 
+  // JSON Syntax Error (body-parser)
+  else if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    statusCode = 400;
+    message    = "Invalid JSON payload format";
+    code       = "INVALID_JSON";
+  }
+
   // Log unexpected errors
   if (statusCode === 500) {
     console.error("🔴 Unhandled error:", {
       message: err.message,
       stack:   process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
+    // Temporary: send actual error message to client to debug Thunder Client issue
+    message = err.message || "Internal server error";
   }
 
   return res.status(statusCode).json({
@@ -80,9 +89,7 @@ const errorHandler = (err, req, res, next) => {
     message,
     code,
     ...(details && { details }),
-    ...(process.env.NODE_ENV === "development" && statusCode === 500 && {
-      stack: err.stack,
-    }),
+    stack: err.stack // temporarily send stack trace too for debugging
   });
 };
 
