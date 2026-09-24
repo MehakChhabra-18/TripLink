@@ -10,3 +10,12 @@ uploads/temp/
 prisma/migrations/*.sql
 
 /src/generated/prisma
+
+# Firebase — NEVER commit service account private keys
+service-account.json
+*-service-account.json
+firebase-adminsdk-*.json
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

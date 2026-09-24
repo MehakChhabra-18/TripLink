@@ -57,34 +57,54 @@ initSocket(io);
 // ─── Startup ───────────────────────────────────────────────────────────────────
 const start = async () => {
   try {
-    // 1. Connect PostgreSQL (required — blocks startup)
-    await prisma.$connect();
-    console.log("✅ PostgreSQL (Prisma) connected");
-
-    // 2. Start HTTP server IMMEDIATELY so Render detects the open port
+    // 1. Start HTTP server IMMEDIATELY (landing page, static assets, health check)
     server.listen(PORT, "0.0.0.0", () => {
       console.log("");
-      console.log("🚗  TripLink Backend v2.0 — Production Architecture");
+      console.log("🚗  TripLink Backend v2.0 — Firebase Migration Architecture");
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       console.log(`🌐  HTTP Server   : http://0.0.0.0:${PORT}`);
       console.log(`📡  Socket.IO     : ready`);
-      console.log(`🗄️   PostgreSQL    : connected`);
-      console.log(`🔒  Auth          : JWT + Refresh Tokens`);
+      console.log(`🔒  Auth          : JWT + Sessions (Firebase Auth pending)`);
       console.log(`💳  Razorpay      : ${process.env.RAZORPAY_KEY_ID ? "configured" : "not configured"}`);
+      console.log(`🔥  Firebase      : ${process.env.FIREBASE_PROJECT_ID ? "configured" : "not configured"}`);
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
       console.log("");
     });
+
+    // 2. Connect PostgreSQL (non-blocking during Firebase migration)
+    if (process.env.DATABASE_URL) {
+      try {
+        await prisma.$connect();
+        console.log("✅ PostgreSQL (Prisma) connected");
+      } catch (dbErr) {
+        console.warn("⚠️  PostgreSQL connection failed:", dbErr.message);
+        console.warn("   Ride/payment features using Prisma will be unavailable.");
+        console.warn("   Landing page and static routes will still work.");
+      }
+    } else {
+      console.warn("⚠️  DATABASE_URL not set — PostgreSQL disabled.");
+      console.warn("   Ride/payment features using Prisma will be unavailable.");
+    }
 
     // 3. Non-critical: connect mailer in background
     verifyMailer().catch((err) =>
       console.warn("⚠️  Mailer skipped:", err.message)
     );
 
+    // 4. Initialize Firebase Admin SDK (non-blocking)
+    try {
+      const { getFirebaseAdmin } = require("./config/firebase");
+      getFirebaseAdmin();
+    } catch (fbErr) {
+      console.warn("⚠️  Firebase Admin SDK not initialized:", fbErr.message);
+    }
+
   } catch (err) {
     console.error("❌ Server startup failed:", err.message);
     process.exit(1);
   }
 };
+
 
 
 // ─── Graceful Shutdown ────────────────────────────────────────────────────────

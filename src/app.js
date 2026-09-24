@@ -63,6 +63,17 @@ app.use(session({
   cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
 
+// ─── Inject Firebase public config into all EJS views ─────────────────────────
+// The Firebase client config is PUBLIC and safe to send to the browser.
+// This makes `firebaseConfig` and `firebaseEnabled` available in all EJS templates.
+const { getFirebaseClientConfig } = require("./config/firebaseClient");
+
+app.use((req, res, next) => {
+  res.locals.firebaseConfig  = getFirebaseClientConfig();
+  res.locals.firebaseEnabled = !!(process.env.FIREBASE_API_KEY && process.env.FIREBASE_PROJECT_ID);
+  next();
+});
+
 // ─── Core Middleware ──────────────────────────────────────────────────────────
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));

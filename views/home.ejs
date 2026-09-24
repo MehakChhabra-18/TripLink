@@ -3,463 +3,1688 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TripLink — Smart Ride Sharing</title>
-  <meta name="description" content="TripLink is a next-gen ride-sharing platform where YOU decide the fare. Real-time bidding between riders and drivers.">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <title>TripLink — Your Ride, Our Connection</title>
+  <meta name="description" content="Move through your city with confidence. TripLink helps you plan, book and monitor every journey — built around your arrival time, not just your destination.">
+  <meta name="theme-color" content="#4F46E5">
+  <meta property="og:title" content="TripLink — Your Ride, Our Connection">
+  <meta property="og:description" content="The ride-hailing platform built around your journey. Tell us when you need to arrive.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/triplink.css">
   <style>
-    /* ─── HOME-SPECIFIC ─── */
-    body { overflow-x: hidden; }
+    /* ─── Page-specific overrides ─── */
+    body { padding-top: 64px; }
 
-    /* Animated bg blobs */
-    .bg-blobs {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
+    /* ─── Hero Section ─────────────────────────────────────────────── */
+    .hero-section {
+      position: relative;
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
       overflow: hidden;
+      background: linear-gradient(165deg, #FFFFFF 0%, #F5F3FF 40%, #EEF2FF 100%);
     }
 
-    .blob {
+    .hero-blob-1 {
       position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.18;
-      animation: blobFloat 8s ease-in-out infinite;
+      width: 700px; height: 700px;
+      top: -200px; right: -150px;
+      background: radial-gradient(circle at center, rgba(79,70,229,0.1), transparent 65%);
+      animation: blob-float 12s ease-in-out infinite;
     }
 
-    .blob-1 {
+    .hero-blob-2 {
+      position: absolute;
       width: 500px; height: 500px;
-      background: radial-gradient(circle, #6c63ff, transparent);
-      top: -150px; left: -100px;
-      animation-delay: 0s;
+      bottom: -100px; left: -100px;
+      background: radial-gradient(circle at center, rgba(251,191,36,0.08), transparent 65%);
+      animation: blob-float 9s ease-in-out infinite reverse;
     }
 
-    .blob-2 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, #00d4aa, transparent);
-      top: 200px; right: -120px;
-      animation-delay: -3s;
-    }
-
-    .blob-3 {
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, #6c63ff, transparent);
-      bottom: 100px; left: 30%;
-      animation-delay: -5s;
-    }
-
-    @keyframes blobFloat {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33%  { transform: translate(20px, -15px) scale(1.05); }
-      66%  { transform: translate(-10px, 20px) scale(0.95); }
-    }
-
-    /* Hero */
-    .hero {
+    .hero-inner {
       position: relative;
       z-index: 1;
-      text-align: center;
-      padding: 80px 20px 60px;
-      animation: fadeUp 0.8s ease both;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      width: 100%;
     }
 
-    .hero-tag {
+    .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(108,99,255,0.1);
-      border: 1px solid rgba(108,99,255,0.3);
-      border-radius: 50px;
-      padding: 6px 16px;
-      font-size: 13px;
-      color: #a8a0ff;
-      margin-bottom: 24px;
-      letter-spacing: 0.5px;
-    }
-
-    .hero-tag span { width: 6px; height: 6px; border-radius: 50%; background: #6c63ff; animation: pulse-green 1.5s infinite; }
-
-    .hero h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: clamp(36px, 6vw, 72px);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -2px;
+      padding: 6px 14px;
+      background: rgba(79,70,229,0.08);
+      border: 1px solid rgba(79,70,229,0.2);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       margin-bottom: 20px;
-      color: var(--text-primary);
     }
 
-    .hero h1 .gradient-text {
-      background: linear-gradient(135deg, #6c63ff 0%, #00d4aa 60%, #22c55e 100%);
+    .hero-badge-dot {
+      width: 7px; height: 7px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      animation: glow-pulse 2s infinite;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5.5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      color: var(--color-text-primary);
+      margin-bottom: 20px;
+    }
+
+    .hero-title .accent-line {
+      background: linear-gradient(135deg, #4F46E5 0%, #818CF8 60%, #FBBF24 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .hero p {
-      font-size: 18px;
-      color: var(--text-secondary);
-      max-width: 520px;
-      margin: 0 auto 36px;
-      line-height: 1.7;
+    .hero-subtitle {
+      font-size: 1.0625rem;
+      color: var(--color-text-secondary);
+      line-height: 1.75;
+      max-width: 480px;
+      margin-bottom: 36px;
     }
 
-    .hero-actions {
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .hero-trust {
       display: flex;
-      gap: 14px;
-      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-top: 40px;
       flex-wrap: wrap;
     }
 
-    .hero-actions .btn-big {
-      padding: 16px 36px;
+    .hero-trust-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    .hero-trust-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-on-track);
+    }
+
+    /* ─── Booking Widget ─────────────────────────────────────────────── */
+    .booking-widget {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 24px 80px rgba(79,70,229,0.12), 0 8px 24px rgba(0,0,0,0.06);
+      position: relative;
+    }
+
+    .booking-widget::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: 25px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(251,191,36,0.1));
+      z-index: -1;
+    }
+
+    .widget-title {
+      font-family: var(--font-display);
+      font-size: 1.0625rem;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      margin-bottom: 4px;
+    }
+
+    .widget-subtitle {
+      font-size: 0.825rem;
+      color: var(--color-text-muted);
+      margin-bottom: 20px;
+    }
+
+    .widget-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .widget-field {
+      position: relative;
+    }
+
+    .widget-field-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .widget-input {
+      width: 100%;
+      padding: 12px 14px 12px 38px;
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-border);
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--color-text-primary);
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .widget-input::placeholder { color: var(--color-text-placeholder); }
+    .widget-input:focus {
+      border-color: var(--color-primary);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+    }
+
+    .widget-divider {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 0;
+      margin: 2px 0;
+      z-index: 2;
+    }
+
+    .widget-swap-btn {
+      position: absolute;
+      width: 28px; height: 28px;
+      background: white;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .widget-swap-btn:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 4px 10px rgba(79,70,229,0.15);
+      transform: rotate(180deg);
+    }
+
+    .widget-time-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .widget-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+      color: white;
+      border: none;
       border-radius: 14px;
-      font-size: 16px;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-flex;
+      transition: all 0.25s;
+      display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      border: none;
-      width: auto;
+      box-shadow: 0 8px 24px rgba(79,70,229,0.3);
+      margin-top: 14px;
     }
 
-    .btn-big.primary {
-      background: linear-gradient(135deg, #6c63ff, #5a52e0);
-      color: white;
-      box-shadow: 0 8px 30px rgba(108,99,255,0.4);
+    .widget-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(79,70,229,0.4);
     }
 
-    .btn-big.primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(108,99,255,0.5);
+    .widget-btn:active { transform: translateY(0); }
+
+    /* Journey Preview Result */
+    .journey-preview {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-border);
+      display: none;
     }
 
-    .btn-big.secondary {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--text-primary);
+    .journey-preview.visible { display: block; animation: fade-up 0.4s ease both; }
+
+    .journey-preview-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
     }
 
-    .btn-big.secondary:hover {
-      background: rgba(255,255,255,0.09);
-      transform: translateY(-3px);
-    }
-
-    /* Stats row */
-    .stats-row {
+    .journey-preview-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      max-width: 700px;
-      margin: 60px auto 20px;
-      animation: fadeUp 0.8s 0.2s ease both;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
     }
 
-    .stat-item {
-      text-align: center;
-      padding: 24px 16px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 18px;
-      transition: all 0.3s ease;
+    .jp-chip {
+      padding: 10px 12px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
     }
 
-    .stat-item:hover {
-      background: rgba(108,99,255,0.06);
-      border-color: rgba(108,99,255,0.2);
-      transform: translateY(-3px);
-    }
+    .jp-chip-label { font-size: 0.7rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .jp-chip-value { font-family: var(--font-display); font-size: 1rem; font-weight: 800; color: var(--color-text-primary); margin-top: 2px; }
 
-    .stat-item .num {
-      font-family: 'Outfit', sans-serif;
-      font-size: 32px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #6c63ff, #00d4aa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .stat-item .lbl {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* How it works */
-    .section {
+    /* ─── Journey Intelligence Section ────────────────────────────────── */
+    .ji-section {
+      background: linear-gradient(160deg, #FFFFFF 0%, #F5F3FF 100%);
+      padding: 96px 0;
+      overflow: hidden;
       position: relative;
+    }
+
+    .ji-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ji-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(79,70,229,0.15);
+    }
+
+    .ji-ring-1 { width: 340px; height: 340px; animation: spin 30s linear infinite; }
+    .ji-ring-2 { width: 240px; height: 240px; animation: spin 20s linear infinite reverse; }
+
+    .ji-center {
+      width: 200px; height: 200px;
+      background: linear-gradient(135deg, #4F46E5, #818CF8);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 20px 60px rgba(79,70,229,0.3);
+      color: white;
+      text-align: center;
       z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px 24px 60px;
-      animation: fadeUp 0.8s 0.35s ease both;
+      padding: 20px;
     }
 
-    .section-title {
+    .ji-center-time {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .ji-center-label { font-size: 0.7rem; font-weight: 600; opacity: 0.8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .ji-orbit-item {
+      position: absolute;
+      width: 80px; height: 80px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--color-text-secondary);
       text-align: center;
-      margin-bottom: 40px;
+      gap: 4px;
     }
 
-    .section-title h2 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin-bottom: 8px;
+    .ji-orbit-item .icon { font-size: 1.3rem; }
+
+    /* Positioned around the circle */
+    .ji-orbit-1 { top: 10px;   left: 50%; transform: translateX(-50%) translateX(-160px); }
+    .ji-orbit-2 { top: 50%;   right: -10px; transform: translateY(-50%); }
+    .ji-orbit-3 { bottom: 10px; left: 50%; transform: translateX(-50%) translateX(80px); }
+    .ji-orbit-4 { top: 50%;   left: -10px; transform: translateY(-50%); }
+
+    .ji-features { display: flex; flex-direction: column; gap: 24px; }
+
+    .ji-feature {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s;
     }
 
-    .section-title p {
-      color: var(--text-muted);
-      font-size: 15px;
+    .ji-feature:hover {
+      border-color: var(--color-primary-border);
+      box-shadow: var(--shadow-md);
+      transform: translateX(4px);
     }
 
-    .how-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
+    .ji-feature-icon {
+      width: 44px; height: 44px;
+      background: var(--color-primary-bg);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
     }
 
-    .how-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
+    .ji-feature-title { font-weight: 700; font-size: 0.95rem; color: var(--color-text-primary); }
+    .ji-feature-desc  { font-size: 0.825rem; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.5; }
+
+    /* ─── Services Section ───────────────────────────────────────────── */
+    .services-section { background: white; padding: 96px 0; }
+
+    .service-card {
+      padding: 28px;
+      background: white;
+      border: 1px solid var(--color-border);
       border-radius: 20px;
-      padding: 28px 22px;
-      text-align: center;
-      transition: all 0.35s ease;
-      cursor: default;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s;
       position: relative;
       overflow: hidden;
     }
 
-    .how-card::before {
-      content: '';
+    .service-card::before {
+      content: "";
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 3px;
-      background: linear-gradient(90deg, #6c63ff, #00d4aa);
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
       transform: scaleX(0);
-      transition: transform 0.35s ease;
+      transform-origin: left;
+      transition: transform 0.35s;
     }
 
-    .how-card:hover::before { transform: scaleX(1); }
-
-    .how-card:hover {
-      background: rgba(108,99,255,0.06);
-      border-color: rgba(108,99,255,0.2);
-      transform: translateY(-6px);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    .service-card:hover {
+      border-color: var(--color-primary-border);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
     }
 
-    .how-card .icon {
-      font-size: 36px;
+    .service-card:hover::before { transform: scaleX(1); }
+
+    .service-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .service-title { font-weight: 700; font-size: 1rem; margin-bottom: 8px; }
+    .service-desc  { font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.6; }
+
+    .service-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--color-accent-bg);
+      color: var(--color-accent-dark);
+      border: 1px solid var(--color-accent-border);
+    }
+
+    /* ─── How It Works ───────────────────────────────────────────────── */
+    .hiw-section {
+      background: linear-gradient(160deg, #F5F3FF 0%, #EEF2FF 100%);
+      padding: 96px 0;
+    }
+
+    .hiw-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+      margin-top: 56px;
+    }
+
+    .hiw-steps::before {
+      content: "";
+      position: absolute;
+      top: 32px;
+      left: calc(12.5% + 24px);
+      right: calc(12.5% + 24px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light), var(--color-accent));
+    }
+
+    .hiw-step { text-align: center; padding: 0 20px; }
+
+    .hiw-step-number {
+      width: 64px; height: 64px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 900;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hiw-step:nth-child(1) .hiw-step-number { background: var(--color-primary); color: white; box-shadow: 0 8px 24px rgba(79,70,229,0.35); }
+    .hiw-step:nth-child(2) .hiw-step-number { background: #818CF8; color: white; box-shadow: 0 8px 24px rgba(129,140,248,0.35); }
+    .hiw-step:nth-child(3) .hiw-step-number { background: var(--color-accent); color: #1a1a1a; box-shadow: 0 8px 24px rgba(251,191,36,0.35); }
+    .hiw-step:nth-child(4) .hiw-step-number { background: var(--color-on-track); color: white; box-shadow: 0 8px 24px rgba(16,185,129,0.35); }
+
+    .hiw-step-icon { font-size: 1.75rem; margin-bottom: 8px; }
+    .hiw-step-title { font-weight: 700; font-size: 0.95rem; color: var(--color-text-primary); margin-bottom: 6px; }
+    .hiw-step-desc { font-size: 0.825rem; color: var(--color-text-secondary); line-height: 1.6; }
+
+    .hiw-highlight {
+      background: white;
+      border: 1.5px solid var(--color-primary-border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .hiw-highlight-icon {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      flex-shrink: 0;
+      box-shadow: 0 8px 20px rgba(79,70,229,0.25);
+    }
+
+    /* ─── Journey Health Demo ────────────────────────────────────────── */
+    .health-demo-section { background: white; padding: 96px 0; }
+
+    .health-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
+
+    .health-card {
+      padding: 28px;
+      border-radius: 20px;
+      border: 2px solid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .health-card.on-track {
+      background: linear-gradient(135deg, rgba(16,185,129,0.04), rgba(16,185,129,0.01));
+      border-color: rgba(16,185,129,0.25);
+    }
+
+    .health-card.at-risk {
+      background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(245,158,11,0.01));
+      border-color: rgba(245,158,11,0.25);
+    }
+
+    .health-card.delayed {
+      background: linear-gradient(135deg, rgba(244,63,94,0.04), rgba(244,63,94,0.01));
+      border-color: rgba(244,63,94,0.2);
+    }
+
+    .health-card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .health-card.on-track .health-card-badge { background: rgba(16,185,129,0.1); color: var(--color-on-track); }
+    .health-card.at-risk  .health-card-badge { background: rgba(245,158,11,0.1);  color: var(--color-at-risk); }
+    .health-card.delayed  .health-card-badge { background: rgba(244,63,94,0.1);   color: var(--color-delayed); }
+
+    .health-card-badge-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      animation: glow-pulse 1.5s infinite;
+    }
+
+    .health-card.on-track .health-card-badge-dot { background: var(--color-on-track); }
+    .health-card.at-risk  .health-card-badge-dot { background: var(--color-at-risk); }
+    .health-card.delayed  .health-card-badge-dot { background: var(--color-delayed); }
+
+    .health-card-times { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+    .health-time-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .health-time-label { color: var(--color-text-muted); }
+
+    .health-time-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--color-text-primary);
+    }
+
+    .health-buffer {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .health-card.on-track .health-buffer { color: var(--color-on-track); }
+    .health-card.at-risk  .health-buffer { color: var(--color-at-risk); }
+    .health-card.delayed  .health-buffer { color: var(--color-delayed); }
+
+    .health-card-msg { font-size: 0.825rem; color: var(--color-text-secondary); line-height: 1.5; }
+
+    /* ─── Safety Section ─────────────────────────────────────────────── */
+    .safety-section {
+      background: linear-gradient(160deg, var(--color-surface) 0%, var(--color-bg) 100%);
+      padding: 96px 0;
+    }
+
+    .safety-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .safety-item {
+      padding: 24px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s;
+    }
+
+    .safety-item:hover {
+      border-color: var(--color-primary-border);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+
+    .safety-icon {
+      font-size: 2rem;
       margin-bottom: 14px;
+      display: block;
+    }
+
+    .safety-title { font-weight: 700; font-size: 0.95rem; color: var(--color-text-primary); margin-bottom: 6px; }
+    .safety-desc  { font-size: 0.83rem; color: var(--color-text-secondary); line-height: 1.6; }
+
+    /* ─── Testimonials ───────────────────────────────────────────────── */
+    .testimonials-section { background: white; padding: 96px 0; }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .testimonial-card {
+      padding: 28px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      position: relative;
+      transition: all 0.25s;
+    }
+
+    .testimonial-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+
+    .testimonial-card::before {
+      content: "\201C";
+      position: absolute;
+      top: 16px; right: 20px;
+      font-size: 5rem;
+      font-family: Georgia, serif;
+      color: rgba(79,70,229,0.08);
+      line-height: 1;
+    }
+
+    .testimonial-rating { display: flex; gap: 2px; color: var(--color-accent); font-size: 0.875rem; margin-bottom: 12px; }
+
+    .testimonial-text { font-size: 0.9rem; color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-author-name  { font-weight: 700; font-size: 0.875rem; }
+    .testimonial-author-title { font-size: 0.775rem; color: var(--color-text-muted); }
+
+    /* ─── Driver CTA Section ─────────────────────────────────────────── */
+    .driver-section {
+      background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+      padding: 80px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .driver-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 80% 50%, rgba(251,191,36,0.15), transparent 60%);
+    }
+
+    .driver-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .driver-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      color: white;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+
+    .driver-title span { color: var(--color-accent); }
+
+    .driver-subtitle { color: rgba(255,255,255,0.75); font-size: 1rem; line-height: 1.7; margin-bottom: 28px; }
+
+    .driver-benefits { display: flex; flex-direction: column; gap: 12px; }
+
+    .driver-benefit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .driver-benefit-check {
+      width: 20px; height: 20px;
+      background: rgba(16,185,129,0.2);
+      border: 1px solid rgba(16,185,129,0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      flex-shrink: 0;
+    }
+
+    .driver-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .driver-stat-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .driver-stat-value {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      color: white;
+    }
+
+    .driver-stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.65); margin-top: 4px; }
+
+    /* ─── Final CTA ──────────────────────────────────────────────────── */
+    .cta-section {
+      background: linear-gradient(160deg, #F5F3FF 0%, #EEF2FF 100%);
+      padding: 96px 0;
+      text-align: center;
+    }
+
+    .cta-icon {
+      font-size: 3.5rem;
+      margin-bottom: 16px;
       display: block;
       animation: float 3s ease-in-out infinite;
     }
 
-    .how-card:nth-child(2) .icon { animation-delay: -1s; }
-    .how-card:nth-child(3) .icon { animation-delay: -2s; }
-
-    .how-card h3 {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 8px;
+    .cta-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      color: var(--color-text-primary);
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
     }
 
-    .how-card p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.65;
+    .cta-subtitle { color: var(--color-text-secondary); font-size: 1rem; max-width: 460px; margin: 0 auto 32px; line-height: 1.7; }
+    .cta-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+    /* ─── Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .hiw-steps { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+      .hiw-steps::before { display: none; }
+      .health-cards { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* CTA Banner */
-    .cta-banner {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto 60px;
-      padding: 0 24px;
-      animation: fadeUp 0.8s 0.5s ease both;
-    }
-
-    .cta-inner {
-      background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,212,170,0.1));
-      border: 1px solid rgba(108,99,255,0.3);
-      border-radius: 24px;
-      padding: 40px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cta-inner::after {
-      content: '🚗';
-      position: absolute;
-      right: 40px;
-      bottom: -10px;
-      font-size: 80px;
-      opacity: 0.12;
-    }
-
-    .cta-inner h2 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin-bottom: 10px;
-    }
-
-    .cta-inner p {
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-    }
-
-    .cta-btns {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    /* Footer */
-    .footer {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      padding: 24px;
-      color: var(--text-muted);
-      font-size: 13px;
-      border-top: 1px solid var(--border);
-    }
-
-    @media (max-width: 640px) {
-      .how-grid { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: 1fr 1fr; }
-      .stats-row .stat-item:last-child { grid-column: span 2; }
-      .cta-inner { padding: 28px 20px; }
+    @media (max-width: 768px) {
+      body { padding-top: 56px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; padding: 48px 16px; }
+      .hero-title { font-size: 2.25rem; }
+      .booking-widget { padding: 20px; }
+      .ji-section .grid-2,
+      .driver-inner { grid-template-columns: 1fr; }
+      .safety-grid { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .hiw-steps { grid-template-columns: 1fr; }
+      .driver-stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .ji-visual { display: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- Animated background blobs -->
-<div class="bg-blobs">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
+<!-- ═══════════════════════════════════════════════════════════════
+  NAVBAR
+════════════════════════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-logo">
+      <div class="navbar-logo-mark">🚗</div>
+      <span class="navbar-logo-text">Trip<span>Link</span></span>
+    </a>
 
-<!-- NAVBAR -->
-<div class="container" style="position:relative;z-index:1;">
-  <nav class="navbar">
-    <div class="logo">⚡ TripLink</div>
-    <div class="nav-links">
+    <ul class="navbar-nav">
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#journey-intelligence">Journey Intel</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#safety">Safety</a></li>
+      <li><a href="/driver">Drive with Us</a></li>
+    </ul>
+
+    <div class="navbar-actions">
       <% if (user) { %>
-        <a href="/<%= user.role %>/dashboard">Dashboard</a>
-        <a href="/auth/logout">Logout</a>
+        <% if (user.role === 'DRIVER') { %>
+          <a href="/driver/dashboard" class="btn btn-secondary btn-sm">Dashboard</a>
+        <% } else { %>
+          <a href="/rider/dashboard" class="btn btn-primary btn-sm">My Journeys</a>
+        <% } %>
       <% } else { %>
-        <a href="/auth/login">Sign In</a>
-        <a href="/auth/register" class="btn-primary">Get Started</a>
+        <a href="/auth/login" class="btn btn-ghost btn-sm">Sign In</a>
+        <a href="/auth/register" class="btn btn-primary btn-sm">Get Started</a>
       <% } %>
     </div>
-  </nav>
-</div>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-tag">
-    <span></span>
-    Real-time ride bidding — You control the fare
   </div>
+</nav>
 
-  <h1>
-    Your Ride,<br>
-    <span class="gradient-text">Your Price.</span>
-  </h1>
+<!-- ═══════════════════════════════════════════════════════════════
+  HERO
+════════════════════════════════════════════════════════════════ -->
+<section class="hero-section">
+  <div class="hero-blob-1"></div>
+  <div class="hero-blob-2"></div>
 
-  <p>
-    TripLink is a next-gen platform where riders set their own fare and drivers choose to accept.
-    No surge pricing — just fair, transparent travel.
-  </p>
+  <div class="hero-inner">
+    <!-- Left: Copy -->
+    <div class="animate-fade-up">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Journey Intelligence
+      </div>
 
-  <div class="hero-actions">
-    <% if (user) { %>
-      <a href="/<%= user.role %>/dashboard" class="btn-big primary">🚀 Go to Dashboard</a>
-    <% } else { %>
-      <a href="/auth/register" class="btn-big primary">🚀 Start Riding Free</a>
-      <a href="/auth/login" class="btn-big secondary">Sign In →</a>
-    <% } %>
-  </div>
+      <h1 class="hero-title">
+        Your Ride,<br>
+        <span class="accent-line">Our Connection.</span>
+      </h1>
 
-  <!-- Stats row -->
-  <div class="stats-row">
-    <div class="stat-item">
-      <div class="num">₹0</div>
-      <div class="lbl">Surge Pricing</div>
+      <p class="hero-subtitle">
+        Move through your city with confidence. TripLink helps you plan, book and monitor every journey — built around your <strong>arrival time</strong>, not just your destination.
+      </p>
+
+      <div class="hero-actions">
+        <% if (user) { %>
+          <a href="<%= user.role === 'DRIVER' ? '/driver/dashboard' : '/rider/dashboard' %>" class="btn btn-primary btn-lg">
+            Go to Dashboard →
+          </a>
+        <% } else { %>
+          <a href="/auth/register" class="btn btn-primary btn-lg">Plan My Journey →</a>
+          <a href="/driver" class="btn btn-secondary btn-lg">Become a Driver</a>
+        <% } %>
+      </div>
+
+      <div class="hero-trust stagger">
+        <div class="hero-trust-item animate-fade-in">
+          <span class="hero-trust-dot"></span>
+          <span>Real-time tracking</span>
+        </div>
+        <div class="hero-trust-item animate-fade-in">
+          <span class="hero-trust-dot"></span>
+          <span>Journey Health AI</span>
+        </div>
+        <div class="hero-trust-item animate-fade-in">
+          <span class="hero-trust-dot"></span>
+          <span>Secure payments</span>
+        </div>
+      </div>
     </div>
-    <div class="stat-item">
-      <div class="num">100%</div>
-      <div class="lbl">Fare Control</div>
-    </div>
-    <div class="stat-item">
-      <div class="num">Real-time</div>
-      <div class="lbl">Driver Matching</div>
+
+    <!-- Right: Booking Widget -->
+    <div class="animate-scale-in" style="animation-delay: 150ms;">
+      <div class="booking-widget" id="bookingWidget">
+        <div class="widget-title">Where do you need to be?</div>
+        <div class="widget-subtitle">Set your arrival target and we'll plan the rest.</div>
+
+        <div class="widget-fields">
+          <!-- Pickup -->
+          <div class="widget-field">
+            <span class="widget-field-icon">📍</span>
+            <input
+              type="text"
+              class="widget-input"
+              id="widgetPickup"
+              placeholder="Pickup location"
+              autocomplete="off"
+            >
+          </div>
+
+          <div class="widget-divider">
+            <button class="widget-swap-btn" id="swapBtn" title="Swap locations">⇅</button>
+          </div>
+
+          <!-- Destination -->
+          <div class="widget-field">
+            <span class="widget-field-icon">🎯</span>
+            <input
+              type="text"
+              class="widget-input"
+              id="widgetDestination"
+              placeholder="Destination"
+              autocomplete="off"
+            >
+          </div>
+
+          <!-- Arrival Time -->
+          <div style="margin-top: 4px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">I need to arrive by</div>
+            <div class="widget-time-row">
+              <div class="widget-field">
+                <span class="widget-field-icon">📅</span>
+                <input type="date" class="widget-input" id="widgetDate">
+              </div>
+              <div class="widget-field">
+                <span class="widget-field-icon">🕐</span>
+                <input type="time" class="widget-input" id="widgetTime">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="widget-btn" id="planJourneyBtn">
+          <span id="planBtnText">Plan My Journey →</span>
+          <span id="planBtnSpinner" style="display:none;" class="spinner spinner-sm" style="border-color: rgba(255,255,255,0.3); border-top-color: white;"></span>
+        </button>
+
+        <!-- Journey Preview Result -->
+        <div class="journey-preview" id="journeyPreview">
+          <div class="journey-preview-label">Your Journey Plan</div>
+          <div class="journey-preview-grid">
+            <div class="jp-chip">
+              <div class="jp-chip-label">Pickup by</div>
+              <div class="jp-chip-value" id="previewPickupTime">—</div>
+            </div>
+            <div class="jp-chip">
+              <div class="jp-chip-label">Travel time</div>
+              <div class="jp-chip-value" id="previewTravelTime">—</div>
+            </div>
+            <div class="jp-chip">
+              <div class="jp-chip-label">Fare estimate</div>
+              <div class="jp-chip-value" id="previewFare">—</div>
+            </div>
+            <div class="jp-chip">
+              <div class="jp-chip-label">Buffer</div>
+              <div class="jp-chip-value" id="previewBuffer">—</div>
+            </div>
+          </div>
+
+          <!-- Journey Health Badge -->
+          <div class="journey-health on-track" id="previewHealth">
+            <div class="journey-health-indicator"></div>
+            <div>
+              <div class="journey-health-label" id="previewHealthLabel">ON TRACK</div>
+              <div class="journey-health-message" id="previewHealthMsg">You are on track to arrive with time to spare.</div>
+            </div>
+          </div>
+
+          <% if (!user) { %>
+          <a href="/auth/register" class="widget-btn" style="margin-top: 12px; text-decoration: none; display: flex;">
+            Create Account to Book →
+          </a>
+          <% } else { %>
+          <a href="/rider/dashboard" class="widget-btn" style="margin-top: 12px; text-decoration: none; display: flex;">
+            Book This Journey →
+          </a>
+          <% } %>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="section">
-  <div class="section-title">
-    <h2>How TripLink Works</h2>
-    <p>Three simple steps — no hidden surprises.</p>
-  </div>
+<!-- ═══════════════════════════════════════════════════════════════
+  JOURNEY INTELLIGENCE SECTION
+════════════════════════════════════════════════════════════════ -->
+<section class="ji-section" id="journey-intelligence">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;">
+      <!-- Visual -->
+      <div class="ji-visual" style="height: 360px;">
+        <div class="ji-ring ji-ring-1"></div>
+        <div class="ji-ring ji-ring-2"></div>
+        <div class="ji-center animate-scale-in">
+          <div class="ji-center-time">7:18 PM</div>
+          <div class="ji-center-label">Predicted Arrival</div>
+        </div>
+        <div class="ji-orbit-item ji-orbit-1 animate-fade-in">
+          <span class="icon">📍</span>
+          <span>Pickup<br>7:00 PM</span>
+        </div>
+        <div class="ji-orbit-item ji-orbit-2 animate-fade-in" style="animation-delay: 100ms;">
+          <span class="icon">🚦</span>
+          <span>Traffic<br>Low</span>
+        </div>
+        <div class="ji-orbit-item ji-orbit-3 animate-fade-in" style="animation-delay: 200ms;">
+          <span class="icon">✅</span>
+          <span>Buffer<br>+12 min</span>
+        </div>
+        <div class="ji-orbit-item ji-orbit-4 animate-fade-in" style="animation-delay: 300ms;">
+          <span class="icon">🧠</span>
+          <span>Confidence<br>91%</span>
+        </div>
+      </div>
 
-  <div class="how-grid">
-    <div class="how-card">
-      <span class="icon">📍</span>
-      <h3>Enter Your Route</h3>
-      <p>Type your pickup and drop location. We instantly calculate the estimated distance and suggested fare.</p>
-    </div>
+      <!-- Features -->
+      <div>
+        <div class="section-label">Journey Intelligence</div>
+        <h2 class="section-title">Built around your <span class="gradient-text">arrival time.</span></h2>
+        <p class="section-subtitle" style="margin-bottom: 32px;">
+          TripLink doesn't just ask where you're going. We ask <em>when you need to be there</em> — and intelligently plan backwards from your target arrival.
+        </p>
 
-    <div class="how-card">
-      <span class="icon">💰</span>
-      <h3>Set Your Fare</h3>
-      <p>See the estimated cost and decide how much you want to offer. You're always in control — no forced pricing.</p>
-    </div>
+        <div class="ji-features stagger">
+          <div class="ji-feature animate-fade-up">
+            <div class="ji-feature-icon">🎯</div>
+            <div>
+              <div class="ji-feature-title">Arrival-First Planning</div>
+              <div class="ji-feature-desc">Set your target arrival time. TripLink calculates your optimal pickup window and monitors every minute.</div>
+            </div>
+          </div>
 
-    <div class="how-card">
-      <span class="icon">🤝</span>
-      <h3>Driver Accepts</h3>
-      <p>Your request goes live to nearby drivers in real-time. A driver who likes your offer accepts instantly.</p>
+          <div class="ji-feature animate-fade-up">
+            <div class="ji-feature-icon">💚</div>
+            <div>
+              <div class="ji-feature-title">Live Journey Health</div>
+              <div class="ji-feature-desc">Real-time status: ON TRACK, AT RISK, or DELAYED — with clear buffer time and actionable recommendations.</div>
+            </div>
+          </div>
+
+          <div class="ji-feature animate-fade-up">
+            <div class="ji-feature-icon">🔄</div>
+            <div>
+              <div class="ji-feature-title">Automatic Replanning</div>
+              <div class="ji-feature-desc">If traffic surges or a driver cancels, TripLink instantly recalculates and offers concrete alternatives.</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- CTA BANNER -->
-<% if (!user) { %>
-<div class="cta-banner">
-  <div class="cta-inner">
-    <h2>Ready to take control?</h2>
-    <p>Join thousands of riders who decide what they pay. Sign up free in 30 seconds.</p>
-    <div class="cta-btns">
-      <a href="/auth/register" class="btn-big primary">Register as Rider 🏃</a>
-      <a href="/auth/register" class="btn-big secondary">Join as Driver 🚗</a>
+<!-- ═══════════════════════════════════════════════════════════════
+  SERVICES
+════════════════════════════════════════════════════════════════ -->
+<section class="services-section" id="services">
+  <div class="container">
+    <div class="text-center" style="margin-bottom: 56px;">
+      <div class="section-label" style="margin: 0 auto 16px;">Ride Options</div>
+      <h2 class="section-title">Every journey, every vehicle type.</h2>
+      <p class="section-subtitle" style="margin: 0 auto;">From a quick auto to a premium sedan — all with Journey Intelligence built in.</p>
+    </div>
+
+    <div class="grid-4 stagger">
+      <div class="service-card animate-fade-up">
+        <span class="service-icon">🛵</span>
+        <div class="service-title">Bike</div>
+        <div class="service-desc">Fastest option for solo travel. Zip through traffic and beat the clock.</div>
+        <div class="service-tag">⚡ Quickest</div>
+      </div>
+
+      <div class="service-card animate-fade-up">
+        <span class="service-icon">🛺</span>
+        <div class="service-title">Auto</div>
+        <div class="service-desc">Affordable three-wheeler rides. Perfect for short to medium distances.</div>
+        <div class="service-tag">💰 Best Value</div>
+      </div>
+
+      <div class="service-card animate-fade-up">
+        <span class="service-icon">🚗</span>
+        <div class="service-title">Car</div>
+        <div class="service-desc">Comfortable sedans with AC. Great for groups and longer journeys.</div>
+        <div class="service-tag">⭐ Most Popular</div>
+      </div>
+
+      <div class="service-card animate-fade-up">
+        <span class="service-icon">🏎️</span>
+        <div class="service-title">Premium</div>
+        <div class="service-desc">SUVs and luxury cars for when the journey matters as much as the destination.</div>
+        <div class="service-tag">👑 Premium</div>
+      </div>
     </div>
   </div>
-</div>
-<% } %>
+</section>
 
+<!-- ═══════════════════════════════════════════════════════════════
+  HOW IT WORKS
+════════════════════════════════════════════════════════════════ -->
+<section class="hiw-section" id="how-it-works">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label" style="margin: 0 auto 16px;">The TripLink Way</div>
+      <h2 class="section-title">From goal to arrival — <span class="gradient-text">in four steps.</span></h2>
+    </div>
+
+    <div class="hiw-steps stagger">
+      <div class="hiw-step animate-fade-up">
+        <div class="hiw-step-number">1</div>
+        <div class="hiw-step-icon">📍</div>
+        <div class="hiw-step-title">Set Your Destination</div>
+        <div class="hiw-step-desc">Enter your pickup and where you're headed. Or let TripLink auto-detect your location.</div>
+      </div>
+
+      <div class="hiw-step animate-fade-up">
+        <div class="hiw-step-number">2</div>
+        <div class="hiw-step-icon">🕐</div>
+        <div class="hiw-step-title">Set Arrival Target</div>
+        <div class="hiw-step-desc">Tell us when you need to be there. Journey Intelligence plans your ride backwards from that time.</div>
+      </div>
+
+      <div class="hiw-step animate-fade-up">
+        <div class="hiw-step-number">3</div>
+        <div class="hiw-step-icon">🚗</div>
+        <div class="hiw-step-title">Get Matched</div>
+        <div class="hiw-step-desc">Our matching engine selects the best driver based on location, reliability, and ETA to your pickup.</div>
+      </div>
+
+      <div class="hiw-step animate-fade-up">
+        <div class="hiw-step-number">4</div>
+        <div class="hiw-step-icon">✅</div>
+        <div class="hiw-step-title">Track & Arrive</div>
+        <div class="hiw-step-desc">Watch your Journey Health live. TripLink monitors every minute and replans if anything changes.</div>
+      </div>
+    </div>
+
+    <div class="hiw-highlight animate-fade-up" style="max-width: 640px; margin: 40px auto 0;">
+      <div class="hiw-highlight-icon">🧠</div>
+      <div>
+        <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px;">The core TripLink difference</div>
+        <div style="font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.6;">Most apps ask "where are you going?" — TripLink asks "when do you need to arrive?" This single change makes every journey smarter and less stressful.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  JOURNEY HEALTH DEMO
+════════════════════════════════════════════════════════════════ -->
+<section class="health-demo-section">
+  <div class="container">
+    <div class="text-center" style="margin-bottom: 0;">
+      <div class="section-label" style="margin: 0 auto 16px;">Journey Health</div>
+      <h2 class="section-title">Always know exactly where you stand.</h2>
+      <p class="section-subtitle" style="margin: 0 auto;">Three clear states. No confusion. Real-time monitoring with your arrival target front and center.</p>
+    </div>
+
+    <div class="health-cards stagger">
+      <!-- ON TRACK -->
+      <div class="health-card on-track animate-fade-up">
+        <div class="health-card-badge">
+          <span class="health-card-badge-dot"></span>
+          ON TRACK
+        </div>
+        <div class="health-card-times">
+          <div class="health-time-row">
+            <span class="health-time-label">Target arrival</span>
+            <span class="health-time-value">7:30 PM</span>
+          </div>
+          <div class="health-time-row">
+            <span class="health-time-label">Predicted arrival</span>
+            <span class="health-time-value" style="color: var(--color-on-track);">7:18 PM</span>
+          </div>
+        </div>
+        <div class="health-buffer">+12 min</div>
+        <div class="health-card-msg">You are on track to arrive 12 minutes before your target. Keep it up!</div>
+      </div>
+
+      <!-- AT RISK -->
+      <div class="health-card at-risk animate-fade-up">
+        <div class="health-card-badge">
+          <span class="health-card-badge-dot"></span>
+          AT RISK
+        </div>
+        <div class="health-card-times">
+          <div class="health-time-row">
+            <span class="health-time-label">Target arrival</span>
+            <span class="health-time-value">7:30 PM</span>
+          </div>
+          <div class="health-time-row">
+            <span class="health-time-label">Predicted arrival</span>
+            <span class="health-time-value" style="color: var(--color-at-risk);">7:27 PM</span>
+          </div>
+        </div>
+        <div class="health-buffer">+3 min</div>
+        <div class="health-card-msg">Traffic is increasing. Your arrival time is close to your target. Consider upgrading to a faster vehicle.</div>
+      </div>
+
+      <!-- DELAYED -->
+      <div class="health-card delayed animate-fade-up">
+        <div class="health-card-badge">
+          <span class="health-card-badge-dot"></span>
+          DELAYED
+        </div>
+        <div class="health-card-times">
+          <div class="health-time-row">
+            <span class="health-time-label">Target arrival</span>
+            <span class="health-time-value">7:30 PM</span>
+          </div>
+          <div class="health-time-row">
+            <span class="health-time-label">Predicted arrival</span>
+            <span class="health-time-value" style="color: var(--color-delayed);">7:43 PM</span>
+          </div>
+        </div>
+        <div class="health-buffer">-13 min</div>
+        <div class="health-card-msg">You may arrive after your target. TripLink is looking for a faster route and alternative drivers.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SAFETY
+════════════════════════════════════════════════════════════════ -->
+<section class="safety-section" id="safety">
+  <div class="container">
+    <div class="text-center" style="margin-bottom: 0;">
+      <div class="section-label" style="margin: 0 auto 16px;">Safety First</div>
+      <h2 class="section-title">Your safety is our <span class="gradient-text">foundation.</span></h2>
+    </div>
+
+    <div class="safety-grid stagger">
+      <div class="safety-item animate-fade-up">
+        <span class="safety-icon">🔐</span>
+        <div class="safety-title">OTP-Verified Rides</div>
+        <div class="safety-desc">Every ride begins with a secure OTP shared between you and your driver. No OTP — no start.</div>
+      </div>
+      <div class="safety-item animate-fade-up">
+        <span class="safety-icon">📡</span>
+        <div class="safety-title">Live Location Sharing</div>
+        <div class="safety-desc">Share your Journey Circle — a live tracking link with trusted contacts for every active trip.</div>
+      </div>
+      <div class="safety-item animate-fade-up">
+        <span class="safety-icon">✅</span>
+        <div class="safety-title">Verified Drivers</div>
+        <div class="safety-desc">All drivers complete document verification. License, RC, and vehicle documents are reviewed before activation.</div>
+      </div>
+      <div class="safety-item animate-fade-up">
+        <span class="safety-icon">🚨</span>
+        <div class="safety-title">Emergency SOS</div>
+        <div class="safety-desc">One-tap emergency button in every active ride. Contacts and authorities can be alerted immediately.</div>
+      </div>
+      <div class="safety-item animate-fade-up">
+        <span class="safety-icon">🔒</span>
+        <div class="safety-title">Secure Payments</div>
+        <div class="safety-desc">Powered by Razorpay. Payments processed server-side. Your card details never touch our servers.</div>
+      </div>
+      <div class="safety-item animate-fade-up">
+        <span class="safety-icon">⭐</span>
+        <div class="safety-title">Two-Way Ratings</div>
+        <div class="safety-desc">After every ride, both riders and drivers rate each other. Low-rated accounts are reviewed automatically.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  TESTIMONIALS
+════════════════════════════════════════════════════════════════ -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="text-center" style="margin-bottom: 0;">
+      <div class="section-label" style="margin: 0 auto 16px;">Reviews</div>
+      <h2 class="section-title">Riders who trust TripLink.</h2>
+    </div>
+
+    <div class="testimonials-grid stagger">
+      <div class="testimonial-card animate-fade-up">
+        <div class="testimonial-rating">★★★★★</div>
+        <div class="testimonial-text">"The Journey Health feature is unlike anything I've used before. I had a flight to catch and TripLink alerted me when traffic picked up — I switched to a bike and made it with 8 minutes to spare."</div>
+        <div class="testimonial-author">
+          <div class="avatar">PA</div>
+          <div>
+            <div class="testimonial-author-name">Priya A.</div>
+            <div class="testimonial-author-title">Frequent Flyer, Mumbai</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card animate-fade-up">
+        <div class="testimonial-rating">★★★★★</div>
+        <div class="testimonial-text">"I love that I set my arrival time and TripLink figures out when I need to leave. I never have to do mental math anymore. The buffer indicator keeps me calm the whole ride."</div>
+        <div class="testimonial-author">
+          <div class="avatar">RK</div>
+          <div>
+            <div class="testimonial-author-name">Rohan K.</div>
+            <div class="testimonial-author-title">Software Engineer, Bangalore</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card animate-fade-up">
+        <div class="testimonial-rating">★★★★★</div>
+        <div class="testimonial-text">"Transparent fare breakdown, OTP verification, and real-time updates. TripLink feels like a professional platform, not a side project. Highly recommended for daily commutes."</div>
+        <div class="testimonial-author">
+          <div class="avatar">SM</div>
+          <div>
+            <div class="testimonial-author-name">Sara M.</div>
+            <div class="testimonial-author-title">Marketing Manager, Delhi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  DRIVER CTA
+════════════════════════════════════════════════════════════════ -->
+<section class="driver-section">
+  <div class="driver-inner">
+    <div>
+      <div class="hero-badge" style="background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); color: var(--color-accent); margin-bottom: 16px;">
+        For Drivers
+      </div>
+      <h2 class="driver-title">Drive your future.<br><span>Earn on your terms.</span></h2>
+      <p class="driver-subtitle">Join TripLink's driver network. No commission surprises, transparent earnings, and intelligent ride matching that puts you first.</p>
+
+      <div class="driver-benefits" style="margin-bottom: 28px;">
+        <div class="driver-benefit"><span class="driver-benefit-check">✓</span> Set your own online hours</div>
+        <div class="driver-benefit"><span class="driver-benefit-check">✓</span> See fare before accepting</div>
+        <div class="driver-benefit"><span class="driver-benefit-check">✓</span> Transparent earnings dashboard</div>
+        <div class="driver-benefit"><span class="driver-benefit-check">✓</span> Reliability score & badges</div>
+      </div>
+
+      <a href="/auth/register?role=driver" class="btn btn-accent btn-lg">
+        Start Earning Today →
+      </a>
+    </div>
+
+    <div class="driver-stat-grid">
+      <div class="driver-stat-card">
+        <div class="driver-stat-value">₹800+</div>
+        <div class="driver-stat-label">Avg. daily earnings</div>
+      </div>
+      <div class="driver-stat-card">
+        <div class="driver-stat-value">4.8★</div>
+        <div class="driver-stat-label">Avg. driver rating</div>
+      </div>
+      <div class="driver-stat-card">
+        <div class="driver-stat-value">< 2min</div>
+        <div class="driver-stat-label">Avg. ride request</div>
+      </div>
+      <div class="driver-stat-card">
+        <div class="driver-stat-value">24/7</div>
+        <div class="driver-stat-label">Support available</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  FINAL CTA
+════════════════════════════════════════════════════════════════ -->
+<section class="cta-section">
+  <div class="container">
+    <span class="cta-icon">🚀</span>
+    <h2 class="cta-title">Ready for smarter journeys?</h2>
+    <p class="cta-subtitle">Join TripLink and experience the only ride platform that plans around your arrival time.</p>
+    <div class="cta-actions">
+      <a href="/auth/register" class="btn btn-primary btn-xl">Plan My First Journey →</a>
+      <a href="/auth/login"    class="btn btn-secondary btn-xl">Sign In</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  FOOTER
+════════════════════════════════════════════════════════════════ -->
 <footer class="footer">
-  &copy; 2025 TripLink. Built for fair rides &mdash; by riders, for riders.
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="/" class="navbar-logo" style="margin-bottom: 12px; display: inline-flex;">
+          <div class="navbar-logo-mark">🚗</div>
+          <span class="navbar-logo-text">Trip<span>Link</span></span>
+        </a>
+        <p class="footer-brand-desc">The ride-hailing platform built around your journey. Arrival Intelligence, Journey Health, and transparent fares — every ride.</p>
+      </div>
+
+      <div>
+        <div class="footer-heading">Product</div>
+        <ul class="footer-links">
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#journey-intelligence">Journey Intelligence</a></li>
+          <li><a href="#services">Ride Options</a></li>
+          <li><a href="#safety">Safety</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-heading">Company</div>
+        <ul class="footer-links">
+          <li><a href="#">About TripLink</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-heading">Legal</div>
+        <ul class="footer-links">
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+          <li><a href="#">Refund Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-copyright">© 2026 TripLink. All rights reserved.</div>
+      <div style="font-size: 0.8rem; color: var(--color-text-muted);">
+        Made with ❤️ for smarter journeys
+      </div>
+    </div>
+  </div>
 </footer>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SCRIPTS
+════════════════════════════════════════════════════════════════ -->
+<script>
+// ─── Navbar scroll effect ─────────────────────────────────────
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+// ─── Widget: set default date/time ───────────────────────────
+(function initWidget() {
+  const now  = new Date();
+  const date = document.getElementById('widgetDate');
+  const time = document.getElementById('widgetTime');
+
+  // Default date = today
+  date.value = now.toISOString().slice(0, 10);
+
+  // Default time = now + 90 minutes (a reasonable arrival target)
+  const target = new Date(now.getTime() + 90 * 60 * 1000);
+  time.value = target.toTimeString().slice(0, 5);
+})();
+
+// ─── Swap button ──────────────────────────────────────────────
+document.getElementById('swapBtn').addEventListener('click', () => {
+  const pickup = document.getElementById('widgetPickup');
+  const dest   = document.getElementById('widgetDestination');
+  [pickup.value, dest.value] = [dest.value, pickup.value];
+});
+
+// ─── Journey Intelligence MVP (transparent rule-based) ────────
+/**
+ * Estimates travel time using OSRM via the backend fare API.
+ * Falls back to a local heuristic if unavailable.
+ */
+async function estimateJourney(pickup, destination) {
+  try {
+    const res = await fetch(
+      `/ride/fare?pickup=${encodeURIComponent(pickup)}&destination=${encodeURIComponent(destination)}`
+    );
+    if (!res.ok) throw new Error('Fare API unavailable');
+    const data = await res.json();
+    return {
+      distanceKm:   data.distanceKm || 5,
+      estimatedFare: data.estimatedFare || 90,
+      durationText:  data.durationText || '18 mins',
+      durationMin:   data.durationMin  || 18,
+    };
+  } catch {
+    // Local heuristic fallback
+    const km = 5;
+    return {
+      distanceKm:   km,
+      estimatedFare: 30 + km * 12,
+      durationText:  '~20 mins',
+      durationMin:   20,
+    };
+  }
+}
+
+/**
+ * Journey Intelligence Engine (MVP, rule-based)
+ * Calculates: recommended pickup, buffer, Journey Health, confidence
+ *
+ * @param {Date}   targetArrival
+ * @param {number} travelMinutes
+ * @returns {object}
+ */
+function calculateJourneyIntelligence(targetArrival, travelMinutes) {
+  const DRIVER_MATCH_MIN = 5;    // avg matching wait
+  const BUFFER_SAFE_MIN  = 10;   // safe buffer threshold
+  const BUFFER_WARN_MIN  = 5;    // warning buffer threshold
+
+  const totalMin         = travelMinutes + DRIVER_MATCH_MIN;
+  const recommendedPickup = new Date(targetArrival.getTime() - totalMin * 60 * 1000);
+  const predictedArrival  = new Date(recommendedPickup.getTime() + totalMin * 60 * 1000);
+
+  const bufferMin = Math.round((targetArrival - predictedArrival) / 60000);
+
+  let status, confidence, message;
+
+  if (bufferMin >= BUFFER_SAFE_MIN) {
+    status     = 'ON_TRACK';
+    confidence = Math.min(95, 70 + bufferMin * 2);
+    message    = `You are on track to arrive ${bufferMin} minutes before your target.`;
+  } else if (bufferMin >= BUFFER_WARN_MIN) {
+    status     = 'AT_RISK';
+    confidence = Math.max(40, 65 - (BUFFER_SAFE_MIN - bufferMin) * 5);
+    message    = `Traffic or delays could push you close to your target arrival time.`;
+  } else {
+    status     = 'DELAYED';
+    confidence = Math.max(20, 50 + bufferMin * 3);
+    message    = `You may arrive after your target time. Consider leaving earlier or choosing a faster vehicle.`;
+  }
+
+  return {
+    recommendedPickup,
+    predictedArrival,
+    bufferMin,
+    status,
+    confidence: Math.round(confidence),
+    message,
+  };
+}
+
+function formatTime(date) {
+  return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+// ─── Plan Journey Button ──────────────────────────────────────
+document.getElementById('planJourneyBtn').addEventListener('click', async () => {
+  const pickup      = document.getElementById('widgetPickup').value.trim();
+  const destination = document.getElementById('widgetDestination').value.trim();
+  const dateVal     = document.getElementById('widgetDate').value;
+  const timeVal     = document.getElementById('widgetTime').value;
+
+  if (!pickup || !destination) {
+    showToast('⚠️ Missing fields', 'Please enter both pickup and destination.', 'warning');
+    return;
+  }
+  if (!dateVal || !timeVal) {
+    showToast('⚠️ Set arrival time', 'Please set the date and time you need to arrive by.', 'warning');
+    return;
+  }
+
+  const btn     = document.getElementById('planJourneyBtn');
+  const btnText = document.getElementById('planBtnText');
+  const spinner = document.getElementById('planBtnSpinner');
+
+  btn.disabled = true;
+  btnText.textContent = 'Calculating...';
+  spinner.style.display = 'inline-block';
+
+  try {
+    const { estimatedFare, durationText, durationMin } = await estimateJourney(pickup, destination);
+
+    const targetArrival = new Date(`${dateVal}T${timeVal}`);
+    const ji = calculateJourneyIntelligence(targetArrival, durationMin || 20);
+
+    // Populate preview
+    document.getElementById('previewPickupTime').textContent  = formatTime(ji.recommendedPickup);
+    document.getElementById('previewTravelTime').textContent  = durationText;
+    document.getElementById('previewFare').textContent        = `₹${estimatedFare}`;
+    document.getElementById('previewBuffer').textContent      = ji.bufferMin >= 0 ? `+${ji.bufferMin} min` : `${ji.bufferMin} min`;
+
+    // Journey Health
+    const healthEl    = document.getElementById('previewHealth');
+    const healthLabel = document.getElementById('previewHealthLabel');
+    const healthMsg   = document.getElementById('previewHealthMsg');
+
+    healthEl.className = 'journey-health ' + ji.status.toLowerCase().replace('_', '-');
+    healthLabel.textContent = ji.status.replace('_', ' ');
+    healthMsg.textContent   = ji.message;
+
+    // Show preview
+    document.getElementById('journeyPreview').classList.add('visible');
+
+  } catch (err) {
+    showToast('❌ Error', 'Could not calculate journey. Please try again.', 'error');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = 'Plan My Journey →';
+    spinner.style.display = 'none';
+  }
+});
+
+// ─── Toast system ─────────────────────────────────────────────
+function showToast(title, msg, type = 'info') {
+  const icons = { success: '✅', warning: '⚠️', error: '❌', info: 'ℹ️' };
+  const container = document.getElementById('toastContainer');
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+    <div>
+      <div class="toast-title">${title}</div>
+      ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
+    </div>
+  `;
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 4500);
+}
+
+// ─── Scroll-triggered animations ─────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.animationPlayState = 'running';
+      entry.target.classList.add('in-view');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.animate-fade-up, .animate-scale-in, .animate-fade-in').forEach(el => {
+  el.style.animationPlayState = 'paused';
+  observer.observe(el);
+});
+</script>
 
 </body>
 </html>
